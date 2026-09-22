@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://petualangan-pancaindra.vercel.app/sitemap.xml

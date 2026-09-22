@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    
+    <!-- Title & SEO -->
+    <title>Petualangan Pancaindra - Belajar IPAS 5 Indra Interaktif SD</title>
+    <meta name="description" content="Web app edukasi interaktif untuk anak sekolah SD Kelas 4-6. Jelajahi 5 keajaiban indra manusia dengan modul bite-sized, diagram interaktif, kuis ceria, dan ujian berhadiah medali!" />
+    <meta name="keywords" content="pancaindra, ipas sd, indra penglihat, indra pendengar, indra pengecap, indra pencium, indra peraba, belajar anak interaktif, edtech sd" />
+    <meta name="author" content="Sekawan Digital" />
+    
+    <!-- Open Graph / WhatsApp / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://petualangan-pancaindra.vercel.app/" />
+    <meta property="og:title" content="Petualangan Pancaindra: Detektif 5 Keajaiban Tubuh" />
+    <meta property="og:description" content="Belajar IPAS 5 indra manusia jadi seru dan menyenangkan! Coba kuis taktil dan raih medali master detektif." />
+    <meta property="og:image" content="https://petualangan-pancaindra.vercel.app/favicon.svg" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Petualangan Pancaindra: Detektif 5 Keajaiban Tubuh" />
+    <meta name="twitter:description" content="Belajar IPAS 5 indra manusia jadi seru dan menyenangkan!" />
+    <meta name="twitter:image" content="https://petualangan-pancaindra.vercel.app/favicon.svg" />
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://petualangan-pancaindra.vercel.app/" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="theme-color" content="#38bdf8" />
+
+    <!-- Google Search Console Verification Slot -->
+    <meta name="google-site-verification" content="GSC_VERIFICATION_TOKEN_SLOT" />
+
+    <!-- Anti-FOUC Theme Script (Executed immediately before paint) -->
+    <script>
+      (function() {
+        try {
+          var stored = localStorage.getItem('petualangan_pancaindra_theme');
+          if (stored === 'dark') {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+          }
+        } catch (e) {
+          // fallback
+        }
+      })();
+    </script>
+
+    <!-- Schema.org JSON-LD -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "EducationalApplication",
+        "name": "Petualangan Pancaindra",
+        "applicationCategory": "EducationalApplication",
+        "operatingSystem": "All",
+        "audience": {
+          "@type": "EducationalAudience",
+          "educationalRole": "student"
+        },
+        "description": "Aplikasi edukasi interaktif IPAS SD Kelas 4-6 tentang 5 indra manusia dengan modul bite-sized, peta rasa lidah, dan ujian berhadiah medali.",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "IDR"
+        }
+      }
+    </script>
+  </head>
+  <body class="bg-amber-50/40 text-slate-800 dark:bg-slate-950 dark:text-slate-100 antialiased selection:bg-amber-400 selection:text-slate-900 min-h-screen">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
