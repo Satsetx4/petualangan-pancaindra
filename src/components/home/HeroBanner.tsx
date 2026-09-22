@@ -22,20 +22,20 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
     <motion.div
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
-      className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-500 via-indigo-500 to-purple-600 text-white p-5 sm:p-7 shadow-lg"
+      className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-sky-950 to-teal-950 text-white p-5 sm:p-7 shadow-xl border-2 border-amber-400/20"
     >
-      {/* Background playful circles */}
-      <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-white/10 blur-2xl pointer-events-none" />
-      <div className="absolute -bottom-10 -left-10 w-40 h-40 rounded-full bg-amber-400/20 blur-xl pointer-events-none" />
+      {/* Background playful glowing elements */}
+      <div className="absolute -top-12 -right-12 w-52 h-52 rounded-full bg-amber-400/15 blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-10 -left-10 w-48 h-48 rounded-full bg-emerald-400/20 blur-2xl pointer-events-none" />
 
       <div className="relative z-10 space-y-4">
         {/* Top Badges */}
         <div className="flex flex-wrap items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-bold text-white border border-white/30">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-xs font-bold text-white border border-white/20">
             <span>{progress.profile.avatarEmoji}</span>
-            <span>Detektif {progress.profile.name}</span>
+            <span>Detektif {progress.profile.name || 'Cilik'}</span>
           </span>
-          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-amber-400/90 text-slate-900 text-xs font-black shadow-xs">
+          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-amber-400 text-slate-950 text-xs font-black shadow-xs">
             <Sparkles className="w-3.5 h-3.5" />
             <span>{progress.stars} Bintang</span>
           </span>
@@ -43,8 +43,8 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
 
         {/* Title and Tagline */}
         <div className="space-y-1.5">
-          <h2 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight">
-            Pecahkan Misteri 5 Keajaiban Tubuh! 🔎
+          <h2 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight flex items-center gap-2 flex-wrap">
+            <span>Pecahkan Misteri 5 Keajaiban Tubuh!</span>
           </h2>
           <p className="text-white/90 text-sm sm:text-base leading-relaxed max-w-xl">
             Selamat datang di Markas Detektif Pancaindra. Kumpulkan 5 lencana pulau dan raih medali emas di Arena Ujian Master!

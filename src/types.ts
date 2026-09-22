@@ -96,4 +96,5 @@ export interface UserProgress {
   examHistory: ExamHistoryItem[];
   soundEnabled: boolean;
   theme: 'light' | 'dark';
+  hasCompletedOnboarding: boolean;
 }

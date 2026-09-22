@@ -5,7 +5,7 @@ const THEME_KEY = 'petualangan_pancaindra_theme';
 
 export const INITIAL_PROGRESS: UserProgress = {
   profile: {
-    name: 'Detektif Cilik',
+    name: '',
     avatarId: 'singa',
     avatarEmoji: '🦁',
     title: 'Detektif Pemula',
@@ -20,6 +20,7 @@ export const INITIAL_PROGRESS: UserProgress = {
   examHistory: [],
   soundEnabled: true,
   theme: 'light',
+  hasCompletedOnboarding: false,
 };
 
 export const loadProgress = (): UserProgress => {
@@ -34,6 +35,10 @@ export const loadProgress = (): UserProgress => {
         ...INITIAL_PROGRESS.profile,
         ...(parsed.profile || {}),
       },
+      hasCompletedOnboarding:
+        typeof parsed.hasCompletedOnboarding === 'boolean'
+          ? parsed.hasCompletedOnboarding
+          : Boolean(parsed.profile?.name && parsed.profile?.name.trim().length > 0),
     };
   } catch (err) {
     console.warn('Gagal membaca localStorage, menggunakan state default:', err);

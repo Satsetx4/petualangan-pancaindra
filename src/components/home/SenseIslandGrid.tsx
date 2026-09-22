@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { CheckCircle2, Sparkles, BookOpen, HelpCircle } from 'lucide-react';
+import { CheckCircle2, Sparkles, BookOpen, HelpCircle, Compass } from 'lucide-react';
 import { SENSES_MODULES } from '../../data/sensesData';
 import type { SenseType, UserProgress } from '../../types';
 import { TapButton } from '../ui/TapButton';
@@ -21,8 +21,11 @@ export const SenseIslandGrid: React.FC<SenseIslandGridProps> = ({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg sm:text-xl font-black text-slate-800 dark:text-slate-100 flex items-center gap-2">
-            <span>🏝️ 5 Pulau Keajaiban Tubuh</span>
+          <h3 className="text-lg sm:text-xl font-black text-slate-800 dark:text-slate-100 flex items-center gap-2 font-display">
+            <span className="p-1 rounded-lg bg-sky-100 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400">
+              <Compass className="w-4 h-4" />
+            </span>
+            <span>5 Pulau Keajaiban Tubuh</span>
           </h3>
           <p className="text-xs text-slate-700 dark:text-slate-300">
             Pilih pulau untuk mempelajari anatomi, alur kerja, dan ikuti kuis serunya!

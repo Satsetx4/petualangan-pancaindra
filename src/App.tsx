@@ -26,6 +26,7 @@ import { QuizPlayView } from './components/quiz/QuizPlayView';
 import { ExamArenaView } from './components/exam/ExamArenaView';
 import { ReportCardModal } from './components/exam/ReportCardModal';
 import { StudentProfileModal } from './components/profile/StudentProfileModal';
+import { WelcomeOnboardingModal } from './components/profile/WelcomeOnboardingModal';
 
 export const App: React.FC = () => {
   // Safe LocalStorage state initialization
@@ -171,6 +172,35 @@ export const App: React.FC = () => {
     setCurrentView('home');
   };
 
+  // Handle Onboarding Completion
+  const handleCompleteOnboarding = (
+    name: string,
+    avatarId: string,
+    avatarEmoji: string
+  ) => {
+    setProgress((prev) => ({
+      ...prev,
+      profile: {
+        ...prev.profile,
+        name,
+        avatarId,
+        avatarEmoji,
+      },
+      hasCompletedOnboarding: true,
+    }));
+  };
+
+  // Smart Back Navigation (Anti-Tersesat)
+  const handleSmartBack = () => {
+    if (currentView === 'quiz_play') {
+      setCurrentView('module_detail');
+    } else if (currentView === 'module_detail') {
+      setCurrentView('modules_list');
+    } else {
+      setCurrentView('home');
+    }
+  };
+
   // Current Sense Module for Detail View
   const currentModule =
     SENSES_MODULES.find((m) => m.id === selectedSenseId) || SENSES_MODULES[0];
@@ -192,6 +222,7 @@ export const App: React.FC = () => {
         currentView={currentView}
         titleContext={titleContext}
         onNavigateHome={() => setCurrentView('home')}
+        onNavigateBack={handleSmartBack}
         onOpenProfile={() => setIsProfileModalOpen(true)}
         onToggleSound={handleToggleSound}
         onToggleTheme={handleToggleTheme}
@@ -354,8 +385,7 @@ export const App: React.FC = () => {
           if (tabId === 'home') setCurrentView('home');
           if (tabId === 'modules') setCurrentView('modules_list');
           if (tabId === 'quiz_select') {
-            setSelectedSenseId('mata');
-            setCurrentView('quiz_play');
+            setCurrentView('modules_list');
           }
           if (tabId === 'exam') handleStartExam();
           if (tabId === 'profile') setIsProfileModalOpen(true);
@@ -370,6 +400,11 @@ export const App: React.FC = () => {
           onResetProgress={handleResetData}
           onClose={() => setIsProfileModalOpen(false)}
         />
+      )}
+
+      {/* Welcome Onboarding Modal for Fresh Students */}
+      {!progress.hasCompletedOnboarding && (
+        <WelcomeOnboardingModal onComplete={handleCompleteOnboarding} />
       )}
     </div>
   );

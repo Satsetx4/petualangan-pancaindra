@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { X, RotateCcw, Check } from 'lucide-react';
+import { X, RotateCcw, Check, User } from 'lucide-react';
 import type { UserProgress, StudentProfile } from '../../types';
 import { TapButton } from '../ui/TapButton';
 import { sound } from '../../lib/sound';
@@ -21,6 +21,7 @@ export const StudentProfileModal: React.FC<StudentProfileModalProps> = ({
   const [nameInput, setNameInput] = useState<string>(progress.profile.name);
   const [selectedAvatar, setSelectedAvatar] = useState<string>(progress.profile.avatarId);
   const [showResetConfirm, setShowResetConfirm] = useState<boolean>(false);
+  const [errorMsg, setErrorMsg] = useState<string>('');
 
   const avatars = [
     { id: 'singa', emoji: '🦁', label: 'Singa Cilik' },
@@ -32,8 +33,13 @@ export const StudentProfileModal: React.FC<StudentProfileModalProps> = ({
   ];
 
   const handleSave = () => {
+    const cleanName = nameInput.trim();
+    if (!cleanName) {
+      setErrorMsg('Nama panggilan tidak boleh kosong.');
+      sound.playWrong();
+      return;
+    }
     sound.playPop();
-    const cleanName = nameInput.trim() || 'Detektif Cilik';
     const chosen = avatars.find((a) => a.id === selectedAvatar) || avatars[0];
 
     onUpdateProfile({
@@ -71,8 +77,11 @@ export const StudentProfileModal: React.FC<StudentProfileModalProps> = ({
         </button>
 
         <div className="space-y-1">
-          <h3 className="text-xl font-black text-slate-800 dark:text-slate-100 flex items-center gap-2">
-            <span>👤 Profil Detektif Cilik</span>
+          <h3 className="text-xl font-black text-slate-800 dark:text-slate-100 flex items-center gap-2 font-display">
+            <span className="p-1 rounded-lg bg-sky-100 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400">
+              <User className="w-4 h-4" />
+            </span>
+            <span>Profil Detektif Cilik</span>
           </h3>
           <p className="text-xs text-slate-700 dark:text-slate-300">
             Atur nama dan pilih avatar karakter detektif favoritmu!
@@ -82,16 +91,28 @@ export const StudentProfileModal: React.FC<StudentProfileModalProps> = ({
         {/* Name Input */}
         <div className="space-y-1.5">
           <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
-            Nama Panggilan Siswa
+            Nama Panggilan Siswa <span className="text-rose-500">*</span>
           </label>
           <input
             type="text"
             value={nameInput}
             maxLength={20}
-            onChange={(e) => setNameInput(e.target.value)}
+            onChange={(e) => {
+              setNameInput(e.target.value);
+              if (errorMsg) setErrorMsg('');
+            }}
             placeholder="Masukkan nama panggilan..."
-            className="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 font-bold text-sm text-slate-800 dark:text-white focus:outline-none focus:border-sky-500"
+            className={`w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800 border-2 font-bold text-sm text-slate-800 dark:text-white focus:outline-none transition-colors ${
+              errorMsg
+                ? 'border-rose-400 focus:border-rose-500'
+                : 'border-slate-200 dark:border-slate-700 focus:border-sky-500'
+            }`}
           />
+          {errorMsg && (
+            <p className="text-xs font-bold text-rose-500">
+              {errorMsg}
+            </p>
+          )}
         </div>
 
         {/* Avatar Selection */}

@@ -30,6 +30,14 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="theme-color" content="#38bdf8" />
 
+    <!-- Search Engine Indexing -->
+    <meta name="robots" content="index, follow" />
+
+    <!-- Google Fonts (Fredoka for Display + Plus Jakarta Sans for Body) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
     <!-- Google Search Console Verification Slot -->
     <meta name="google-site-verification" content="GSC_VERIFICATION_TOKEN_SLOT" />
 
@@ -49,24 +57,39 @@
       })();
     </script>
 
-    <!-- Schema.org JSON-LD -->
+    <!-- Schema.org JSON-LD (@graph with EducationalApplication & Organization) -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
-        "@type": "EducationalApplication",
-        "name": "Petualangan Pancaindra",
-        "applicationCategory": "EducationalApplication",
-        "operatingSystem": "All",
-        "audience": {
-          "@type": "EducationalAudience",
-          "educationalRole": "student"
-        },
-        "description": "Aplikasi edukasi interaktif IPAS SD Kelas 4-6 tentang 5 indra manusia dengan modul bite-sized, peta rasa lidah, dan ujian berhadiah medali.",
-        "offers": {
-          "@type": "Offer",
-          "price": "0",
-          "priceCurrency": "IDR"
-        }
+        "@graph": [
+          {
+            "@type": "EducationalApplication",
+            "@id": "https://petualangan-pancaindra.vercel.app/#app",
+            "name": "Petualangan Pancaindra",
+            "applicationCategory": "EducationalApplication",
+            "operatingSystem": "All",
+            "audience": {
+              "@type": "EducationalAudience",
+              "educationalRole": "student"
+            },
+            "description": "Aplikasi edukasi interaktif IPAS SD Kelas 4-6 tentang 5 indra manusia dengan modul bite-sized, peta rasa lidah, dan ujian berhadiah medali.",
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "IDR"
+            },
+            "publisher": {
+              "@id": "https://petualangan-pancaindra.vercel.app/#publisher"
+            }
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://petualangan-pancaindra.vercel.app/#publisher",
+            "name": "Sekawan Digital",
+            "url": "https://sekawandigital.my.id",
+            "logo": "https://petualangan-pancaindra.vercel.app/favicon.svg"
+          }
+        ]
       }
     </script>
   </head>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { RotateCcw, Heart } from 'lucide-react';
+import { RotateCcw, Heart, Compass } from 'lucide-react';
 import { sound } from '../../lib/sound';
 
 interface FooterProps {
@@ -10,8 +10,9 @@ export const Footer: React.FC<FooterProps> = ({ onResetData }) => {
   return (
     <footer className="mt-16 border-t border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 py-8 px-4 text-center pb-24 sm:pb-8">
       <div className="max-w-2xl mx-auto space-y-4">
-        <div className="flex items-center justify-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-300">
-          <span>🔍 Petualangan Pancaindra</span>
+        <div className="flex items-center justify-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-300 font-display">
+          <Compass className="w-4 h-4 text-sky-500 shrink-0" />
+          <span>Petualangan Pancaindra</span>
           <span>•</span>
           <span>IPAS SD Kelas 4–6</span>
         </div>

@@ -8,6 +8,8 @@ import {
   XCircle,
   ChevronDown,
   ChevronUp,
+  Share2,
+  BarChart2,
 } from 'lucide-react';
 import type { QuizQuestion, StudentProfile } from '../../types';
 import { TapButton } from '../ui/TapButton';
@@ -96,6 +98,14 @@ export const ReportCardModal: React.FC<ReportCardModalProps> = ({
     window.print();
   };
 
+  const handleShareWhatsApp = () => {
+    sound.playPop();
+    const studentName = profile.name ? profile.name.trim() : 'Detektif Cilik';
+    const text = `Halo Bapak/Ibu Guru dan Bunda! 🌟\n\nSaya *${studentName}* telah menyelesaikan *Ujian Master Pancaindra (IPAS SD)* di aplikasi *Petualangan Pancaindra*!\n\n📊 Hasil Ujian:\n• Nilai Akhir: *${percentage}/100* (${correctCount} dari ${total} soal benar)\n• Penghargaan: *${medalName}* (${rankTitle})\n• Waktu Pengerjaan: ${formatMinutes(timeSpentSeconds)}\n\nAyo coba belajar dan ikuti ujiannya di: https://petualangan-pancaindra.vercel.app/`;
+    const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
   return (
     <div className="max-w-2xl mx-auto space-y-6 pb-20">
       {/* Printable Certificate & Report Card */}
@@ -109,7 +119,7 @@ export const ReportCardModal: React.FC<ReportCardModalProps> = ({
           <span className="px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 text-xs font-black tracking-widest uppercase">
             Rapor Prestasi Detektif Pancaindra
           </span>
-          <h3 className="text-2xl sm:text-3xl font-black text-slate-800 dark:text-slate-100">
+          <h3 className="text-2xl sm:text-3xl font-black text-slate-800 dark:text-slate-100 font-display">
             Sertifikat Kelulusan Ujian Master
           </h3>
           <p className="text-xs text-slate-700 dark:text-slate-300">
@@ -121,8 +131,8 @@ export const ReportCardModal: React.FC<ReportCardModalProps> = ({
         <div className="py-2 inline-flex items-center gap-3 px-6 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
           <span className="text-4xl">{profile.avatarEmoji}</span>
           <div className="text-left">
-            <h4 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white">
-              {profile.name}
+            <h4 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white font-display">
+              {profile.name || 'Detektif Cilik'}
             </h4>
             <span className="text-xs font-bold text-amber-800 dark:text-amber-400">
               Gelar: {rankTitle}
@@ -136,7 +146,7 @@ export const ReportCardModal: React.FC<ReportCardModalProps> = ({
             {medalEmoji}
           </div>
           <div>
-            <h5 className="text-lg font-black text-slate-800 dark:text-slate-100">
+            <h5 className="text-lg font-black text-slate-800 dark:text-slate-100 font-display">
               {medalName}
             </h5>
             <p className="text-xs text-slate-700 dark:text-slate-300">
@@ -151,7 +161,7 @@ export const ReportCardModal: React.FC<ReportCardModalProps> = ({
             <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300 block">
               Nilai Akhir
             </span>
-            <span className="text-2xl sm:text-3xl font-black text-sky-600 dark:text-sky-400">
+            <span className="text-2xl sm:text-3xl font-black text-sky-600 dark:text-sky-400 font-display">
               {percentage}
             </span>
           </div>
@@ -159,7 +169,7 @@ export const ReportCardModal: React.FC<ReportCardModalProps> = ({
             <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300 block">
               Benar
             </span>
-            <span className="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400">
+            <span className="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400 font-display">
               {correctCount}/{total}
             </span>
           </div>
@@ -167,7 +177,7 @@ export const ReportCardModal: React.FC<ReportCardModalProps> = ({
             <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300 block">
               Bintang
             </span>
-            <span className="text-2xl sm:text-3xl font-black text-amber-500">
+            <span className="text-2xl sm:text-3xl font-black text-amber-500 font-display">
               ⭐ {percentage >= 85 ? '+5' : percentage >= 70 ? '+3' : '+2'}
             </span>
           </div>
@@ -175,9 +185,14 @@ export const ReportCardModal: React.FC<ReportCardModalProps> = ({
 
         {/* Breakdown per Sense */}
         <div className="text-left space-y-2.5 pt-2">
-          <h5 className="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">
-            📊 Rincian Nilai per Indra:
-          </h5>
+          <div className="flex items-center gap-2">
+            <span className="p-1 rounded-lg bg-sky-100 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400">
+              <BarChart2 className="w-4 h-4" />
+            </span>
+            <h5 className="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 font-display">
+              Rincian Nilai per Indra:
+            </h5>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {sensesList.map((sense) => {
               const item = breakdown[sense];
@@ -221,6 +236,15 @@ export const ReportCardModal: React.FC<ReportCardModalProps> = ({
 
         {/* Action Buttons (no-print) */}
         <div className="no-print pt-4 flex flex-wrap gap-2.5 justify-center">
+          <TapButton
+            variant="success"
+            size="md"
+            icon={<Share2 className="w-4 h-4" />}
+            onClick={handleShareWhatsApp}
+          >
+            Kirim ke WhatsApp Guru/Ortu
+          </TapButton>
+
           <TapButton
             variant="amber"
             size="md"
