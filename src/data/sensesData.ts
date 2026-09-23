@@ -7,14 +7,9 @@ export const SENSES_MODULES: SenseModule[] = [
     latinName: 'Oculus',
     nickname: 'Si Penerang Dunia',
     heroEmoji: '👁️',
-    badgeColor: 'bg-emerald-500',
     themeColor: {
       bg: 'from-emerald-50 to-teal-50 dark:from-emerald-950/40 dark:to-teal-950/30',
       border: 'border-emerald-200 dark:border-emerald-800/60',
-      text: 'text-emerald-700 dark:text-emerald-300',
-      accent: 'bg-emerald-500 hover:bg-emerald-600 text-white',
-      cardBg: 'bg-white dark:bg-emerald-950/20',
-      lightBg: 'bg-emerald-100 dark:bg-emerald-900/30',
     },
     mainFunction: 'Indra Penglihat: Melihat bentuk, warna, ukuran, dan gerakan benda di sekitar.',
     overviewText:
@@ -133,33 +128,27 @@ export const SENSES_MODULES: SenseModule[] = [
       {
         title: 'Membaca di Cahaya Cukup',
         description: 'Jangan membaca di ruangan redup atau gelap gulita karena membuat otot mata cepat lelah.',
-        icon: 'SunMedium',
       },
       {
         title: 'Jaga Jarak Membaca',
         description: 'Pertahankan jarak ideal 30–40 cm antara mata dengan buku atau layar gawai.',
-        icon: 'Ruler',
       },
       {
         title: 'Aturan 20-20-20',
         description: 'Setiap 20 menit menatap layar, istirahatkan mata dengan melihat benda sejauh 20 kaki (6 meter) selama 20 detik.',
-        icon: 'Timer',
         rule: 'Aturan 20-20-20',
       },
       {
         title: 'Jangan Mengucek Mata',
         description: 'Jika mata kelilipan debu, kedipkan mata di air bersih atau teteskan obat tetes steril. Mengucek bisa menggores kornea.',
-        icon: 'AlertTriangle',
       },
       {
         title: 'Makanan Bergizi Seimbang',
         description: 'Konsumsi makanan yang kaya Vitamin A, C, dan Omega-3 seperti wortel, tomat, brokoli, dan ikan.',
-        icon: 'Apple',
       },
       {
         title: 'Periksa Mata Berkala',
         description: 'Periksakan kesehatan mata ke dokter spesialis minimal 1 tahun sekali untuk deteksi dini.',
-        icon: 'Activity',
       },
     ],
     funFacts: [
@@ -179,14 +168,9 @@ export const SENSES_MODULES: SenseModule[] = [
     latinName: 'Auris',
     nickname: 'Si Penangkap Nada',
     heroEmoji: '👂',
-    badgeColor: 'bg-sky-500',
     themeColor: {
       bg: 'from-sky-50 to-blue-50 dark:from-sky-950/40 dark:to-blue-950/30',
       border: 'border-sky-200 dark:border-sky-800/60',
-      text: 'text-sky-700 dark:text-sky-300',
-      accent: 'bg-sky-500 hover:bg-sky-600 text-white',
-      cardBg: 'bg-white dark:bg-sky-950/20',
-      lightBg: 'bg-sky-100 dark:bg-sky-900/30',
     },
     mainFunction: 'Indra Pendengar: Menangkap getaran suara dari benda padat, cair, dan gas di sekitar kita.',
     overviewText:
@@ -279,28 +263,23 @@ export const SENSES_MODULES: SenseModule[] = [
       {
         title: 'Hindari Suara Terlalu Keras',
         description: 'Suara bising di atas 85 dB (seperti speaker menggelegar atau ledakan) dapat merusak sel rambut halus di koklea.',
-        icon: 'VolumeX',
       },
       {
         title: 'Aturan 60/60 Earphone',
         description: 'Saat menggunakan headset/earphone, batasi volume maksimal 60% dan dengarkan tidak lebih dari 60 menit sehari.',
-        icon: 'Headphones',
         rule: 'Aturan 60/60',
       },
       {
         title: 'Jaga Telinga Tetap Kering',
         description: 'Setelah mandi atau berenang, keringkan daun telinga perlahan dengan handuk bersih agar tidak lembap berjamur.',
-        icon: 'Droplets',
       },
       {
         title: 'JANGAN Masukkan Benda Tajam',
         description: 'Dilarang menusukkan cotton bud, peniti, atau jari ke liang dalam telinga karena bisa merobek selaput gendang telinga!',
-        icon: 'AlertOctagon',
       },
       {
         title: 'Periksa ke Dokter THT',
         description: 'Jika telinga berdengung, terasa tersumbat berhari-hari, atau nyeri, segera periksakan ke dokter THT.',
-        icon: 'Stethoscope',
       },
     ],
     funFacts: [
@@ -320,39 +299,19 @@ export const SENSES_MODULES: SenseModule[] = [
     latinName: 'Lingua',
     nickname: 'Si Penjelajah Rasa',
     heroEmoji: '👅',
-    badgeColor: 'bg-rose-500',
     themeColor: {
       bg: 'from-rose-50 to-orange-50 dark:from-rose-950/40 dark:to-orange-950/30',
       border: 'border-rose-200 dark:border-rose-800/60',
-      text: 'text-rose-700 dark:text-rose-300',
-      accent: 'bg-rose-500 hover:bg-rose-600 text-white',
-      cardBg: 'bg-white dark:bg-rose-950/20',
-      lightBg: 'bg-rose-100 dark:bg-rose-900/30',
     },
     mainFunction: 'Indra Pengecap: Merasakan aneka cita rasa makanan/minuman dan membantu membolak-balikkan makanan saat dikunyah.',
     overviewText:
-      'Lidah adalah otot fleksibel luar biasa yang dilapisi ribuan papila pengecap. Selain mengecap rasa manis, asin, asam, dan pahit, lidah membantu kita menelan makanan dan berbicara dengan jelas.',
+      'Lidah membantu kita merasakan lima rasa dasar: manis, asin, asam, pahit, dan umami (gurih). Kuncup pengecap di berbagai bagian lidah dapat mengenali berbagai rasa; lidah tidak memiliki zona khusus untuk satu rasa tertentu.',
     anatomy: {
       outer: [
         {
-          name: 'Ujung Lidah (Depan)',
-          function: 'Paling sensitif terhadap rasa MANIS. Contoh: permen, semangka, madu, dan kue.',
-          badge: 'Zona Manis',
-        },
-        {
-          name: 'Samping Depan Lidah',
-          function: 'Paling sensitif terhadap rasa ASIN. Contoh: keju, ikan asin, keripik, dan garam.',
-          badge: 'Zona Asin',
-        },
-        {
-          name: 'Samping Belakang Lidah',
-          function: 'Paling sensitif terhadap rasa ASAM. Contoh: buah lemon, cuka, jeruk nipis, dan asam jawa.',
-          badge: 'Zona Asam',
-        },
-        {
-          name: 'Pangkal / Belakang Lidah',
-          function: 'Paling sensitif terhadap rasa PAHIT. Contoh: kopi tanpa gula, sayur pare, dan obat.',
-          badge: 'Zona Pahit',
+          name: 'Permukaan Lidah',
+          function: 'Papila di berbagai bagian permukaan lidah memiliki kuncup pengecap yang membantu mengenali beragam rasa.',
+          badge: 'Pengecap',
         },
       ],
       inner: [
@@ -367,8 +326,8 @@ export const SENSES_MODULES: SenseModule[] = [
           badge: 'Pelarut Rasa',
         },
         {
-          name: 'Saraf Pengecap (Glosofaringeal)',
-          function: 'Meneruskan sinyal kimiawi rasa yang terdeteksi di papila menuju ke otak.',
+          name: 'Saraf Pengecap',
+          function: 'Membawa pesan tentang rasa dari lidah menuju ke otak.',
           badge: 'Kabel Rasa ke Otak',
         },
       ],
@@ -389,7 +348,7 @@ export const SENSES_MODULES: SenseModule[] = [
       {
         step: 3,
         title: 'Papila Merespons',
-        description: 'Kuncup pengecap di papila mendeteksi rasa manis, asin, asam, atau pahit.',
+        description: 'Kuncup pengecap di berbagai bagian lidah mengenali rasa manis, asin, asam, pahit, dan umami (gurih).',
         iconName: 'Sparkles',
       },
       {
@@ -409,28 +368,24 @@ export const SENSES_MODULES: SenseModule[] = [
       {
         title: 'Bersihkan Lidah Saat Gosok Gigi',
         description: 'Gunakan bagian punggung sikat gigi atau alat pembersih lidah lembut untuk mengangkat sisa kuman dan plak putih.',
-        icon: 'Sparkles',
       },
       {
         title: 'Hindari Makanan Terlalu Panas',
         description: 'Tunggu makanan berkuah atau minuman panas hingga hangat sebelum dimakan agar papila lidah tidak melepuh.',
-        icon: 'Flame',
       },
       {
         title: 'Banyak Minum Air Putih',
         description: 'Air putih menjaga kelembapan rongga mulut dan membantu kerja kuncup perasa tetap optimal.',
-        icon: 'GlassWater',
       },
       {
         title: 'Batasi Makanan Terlalu Pedas / Tajam',
         description: 'Bumbu yang terlalu menyengat dapat mengiritasi dinding lidah dan mengganggu pencernaan.',
-        icon: 'ShieldAlert',
       },
     ],
     funFacts: [
       {
-        title: 'Pedas BUKAN Termasuk Rasa!',
-        fact: 'Secara ilmiah, rasa primer hanya ada 4 (manis, asin, asam, pahit) ditambah umami/gurih. Pedas adalah sensasi panas dan terbakar pada reseptor lidah dan mulut saat terkena zat capsaicin cabai, yang mengirim sinyal nyeri/panas ke otak!',
+        title: 'Mengenal Rasa dan Sensasi Pedas',
+        fact: 'Lima rasa dasar adalah manis, asin, asam, pahit, dan umami (gurih). Pedas adalah sensasi panas atau terbakar yang muncul saat zat capsaicin pada cabai merangsang saraf di mulut.',
         isMythBuster: true,
       },
       {
@@ -445,14 +400,9 @@ export const SENSES_MODULES: SenseModule[] = [
     latinName: 'Nasus',
     nickname: 'Si Pelacak Aroma',
     heroEmoji: '👃',
-    badgeColor: 'bg-amber-500',
     themeColor: {
       bg: 'from-amber-50 to-yellow-50 dark:from-amber-950/40 dark:to-yellow-950/30',
       border: 'border-amber-200 dark:border-amber-800/60',
-      text: 'text-amber-700 dark:text-amber-300',
-      accent: 'bg-amber-500 hover:bg-amber-600 text-white',
-      cardBg: 'bg-white dark:bg-amber-950/20',
-      lightBg: 'bg-amber-100 dark:bg-amber-900/30',
     },
     mainFunction: 'Indra Pencium: Mencium berbagai aroma harum dan bau di sekitar, serta jalan utama bernapas.',
     overviewText:
@@ -524,22 +474,18 @@ export const SENSES_MODULES: SenseModule[] = [
       {
         title: 'Hindari Menghirup Udara Kotor & Asap',
         description: 'Jauhi asap rokok, knalpot hitam, dan debu tebal yang dapat merusak bulu silia dan selaput lendir.',
-        icon: 'CloudOff',
       },
       {
         title: 'Gunakan Masker Saat Berpolusi',
         description: 'Pakai masker penutup hidung dan mulut saat berada di jalan raya berdebu atau tempat renovasi.',
-        icon: 'Shield',
       },
       {
         title: 'JANGAN Mengorek Hidung Terlalu Dalam',
         description: 'Mengorek hidung dengan jari kotor atau kuku tajam dapat melukai pembuluh darah tipis dan menyebabkan mimisan.',
-        icon: 'Hand',
       },
       {
         title: 'Segera Berobat Bila Tersumbat Lama',
         description: 'Jika hidung tersumbat, pilek berat, atau kehilangan penciuman (anosmia) lebih dari seminggu, periksakan ke dokter.',
-        icon: 'Crosshair',
       },
     ],
     funFacts: [
@@ -559,14 +505,9 @@ export const SENSES_MODULES: SenseModule[] = [
     latinName: 'Cutis',
     nickname: 'Si Perisai Ajaib',
     heroEmoji: '✋',
-    badgeColor: 'bg-violet-500',
     themeColor: {
       bg: 'from-violet-50 to-purple-50 dark:from-violet-950/40 dark:to-purple-950/30',
       border: 'border-violet-200 dark:border-violet-800/60',
-      text: 'text-violet-700 dark:text-violet-300',
-      accent: 'bg-violet-500 hover:bg-violet-600 text-white',
-      cardBg: 'bg-white dark:bg-violet-950/20',
-      lightBg: 'bg-violet-100 dark:bg-violet-900/30',
     },
     mainFunction: 'Indra Peraba: Merasakan sentuhan, suhu, tekanan, dan tekstur benda, serta pelindung seluruh organ tubuh.',
     overviewText:
@@ -627,22 +568,18 @@ export const SENSES_MODULES: SenseModule[] = [
       {
         title: 'Mandi Teratur 2 Kali Sehari',
         description: 'Bersihkan tubuh dengan air bersih dan sabun ramah kulit untuk membasuh keringat, kotoran, dan kuman yang menempel.',
-        icon: 'Sparkles',
       },
       {
         title: 'Gunakan Pelindung & Tabir Surya',
         description: 'Pakai sarung tangan tebal saat menyentuh benda panas, dan oleskan tabir surya jika beraktivitas di bawah terik matahari.',
-        icon: 'ShieldCheck',
       },
       {
         title: 'Hindari Menyentuh Benda Berbahaya',
         description: 'Jangan menyentuh api, air mendidih, atau zat kimia keras tanpa alat pengaman.',
-        icon: 'Flame',
       },
       {
         title: 'Jaga Kelembapan Kulit',
         description: 'Minum air putih yang cukup dan oleskan pelembap agar kulit tidak kering, bersisik, atau pecah-pecah.',
-        icon: 'Droplet',
       },
     ],
     funFacts: [

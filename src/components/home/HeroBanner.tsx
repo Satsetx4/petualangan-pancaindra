@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Sparkles, Compass, Award } from 'lucide-react';
 import type { UserProgress } from '../../types';
 import { TapButton } from '../ui/TapButton';
+import { sound } from '../../lib/sound';
 
 interface HeroBannerProps {
   progress: UserProgress;
@@ -15,7 +16,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
   onExploreModules,
   onStartExam,
 }) => {
-  const completedCount = progress.completedLessons.length;
+  const completedCount = progress.lessonCompleted.length;
   const progressPercent = Math.round((completedCount / 5) * 100);
 
   return (
@@ -33,7 +34,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
         <div className="flex flex-wrap items-center gap-2">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-xs font-bold text-white border border-white/20">
             <span>{progress.profile.avatarEmoji}</span>
-            <span>Detektif {progress.profile.name || 'Cilik'}</span>
+            <span>{progress.profile.name ? `Detektif ${progress.profile.name}` : 'Detektif Pancaindra'}</span>
           </span>
           <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-amber-400 text-slate-950 text-xs font-black shadow-xs">
             <Sparkles className="w-3.5 h-3.5" />
@@ -47,7 +48,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
             <span>Pecahkan Misteri 5 Keajaiban Tubuh!</span>
           </h2>
           <p className="text-white/90 text-sm sm:text-base leading-relaxed max-w-xl">
-            Selamat datang di Markas Detektif Pancaindra. Kumpulkan 5 lencana pulau dan raih medali emas di Arena Ujian Master!
+            Selamat datang di Markas Detektif Pancaindra. Selesaikan 5 modul dan raih penghargaan di Arena Ujian Master!
           </p>
         </div>
 
@@ -75,7 +76,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
             variant="amber"
             size="md"
             icon={<Compass className="w-4 h-4" />}
-            onClick={onExploreModules}
+            onClick={() => { sound.playPop(); onExploreModules(); }}
           >
             Jelajahi 5 Pulau
           </TapButton>
@@ -83,7 +84,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
             variant="secondary"
             size="md"
             icon={<Award className="w-4 h-4 text-amber-500" />}
-            onClick={onStartExam}
+            onClick={() => { sound.playPop(); onStartExam(); }}
             className="text-slate-800 dark:text-slate-100"
           >
             Arena Ujian Master

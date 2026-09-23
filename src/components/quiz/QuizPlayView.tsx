@@ -7,22 +7,21 @@ import {
   ArrowRight,
   RotateCcw,
 } from 'lucide-react';
-import type { QuizQuestion, SenseType } from '../../types';
+import type { QuizQuestion } from '../../types';
 import { TapButton } from '../ui/TapButton';
 import { sound } from '../../lib/sound';
 import { triggerConfetti, triggerGrandCelebration } from '../../lib/confetti';
+import { calculateQuizScore, shuffleQuestionOptions } from '../../lib/learning';
 
 interface QuizPlayViewProps {
-  senseId: SenseType;
   organName: string;
   heroEmoji: string;
   questions: QuizQuestion[];
-  onFinishQuiz: (scorePercent: number, starsEarned: number) => void;
+  onFinishQuiz: (scorePercent: number) => number;
   onBack: () => void;
 }
 
 export const QuizPlayView: React.FC<QuizPlayViewProps> = ({
-  senseId: _senseId,
   organName,
   heroEmoji,
   questions,
@@ -30,17 +29,21 @@ export const QuizPlayView: React.FC<QuizPlayViewProps> = ({
   onBack,
 }) => {
   const [currentIndex, setCurrentIndex] = useState<number>(0);
+  const [sessionQuestions, setSessionQuestions] = useState<QuizQuestion[]>(() =>
+    questions.map((question) => shuffleQuestionOptions(question)),
+  );
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [isAnswered, setIsAnswered] = useState<boolean>(false);
   const [correctCount, setCorrectCount] = useState<number>(0);
   const [isFinished, setIsFinished] = useState<boolean>(false);
+  const [starsEarned, setStarsEarned] = useState<number>(0);
 
-  const question = questions[currentIndex];
-  const total = questions.length;
+  const question = sessionQuestions[currentIndex];
+  const total = sessionQuestions.length;
   const isCorrect = selectedOption === question?.correctIndex;
 
   const handleSelectOption = (idx: number) => {
-    if (isAnswered) return;
+    if (isAnswered || !question) return;
 
     setSelectedOption(idx);
     setIsAnswered(true);
@@ -55,32 +58,45 @@ export const QuizPlayView: React.FC<QuizPlayViewProps> = ({
   };
 
   const handleNext = () => {
-    sound.playPop();
     if (currentIndex < total - 1) {
+      sound.playPop();
       setCurrentIndex((prev) => prev + 1);
       setSelectedOption(null);
       setIsAnswered(false);
     } else {
       // Finished
-      const finalCorrect = isCorrect ? correctCount : correctCount;
-      const scorePercent = Math.round((finalCorrect / total) * 100);
-      const stars = scorePercent >= 80 ? 2 : scorePercent >= 40 ? 1 : 0;
+      const scorePercent = calculateQuizScore(correctCount, total);
+      const earned = onFinishQuiz(scorePercent);
 
+      setStarsEarned(earned);
       setIsFinished(true);
       sound.playFanfare();
       triggerGrandCelebration();
-      onFinishQuiz(scorePercent, stars);
     }
   };
 
   const handleRetry = () => {
     sound.playPop();
+    setSessionQuestions(questions.map((item) => shuffleQuestionOptions(item)));
     setCurrentIndex(0);
     setSelectedOption(null);
     setIsAnswered(false);
     setCorrectCount(0);
     setIsFinished(false);
+    setStarsEarned(0);
   };
+
+  if (total === 0) {
+    return (
+      <div className="max-w-xl mx-auto rounded-3xl p-6 bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 text-center space-y-4">
+        <h3 className="text-xl font-black text-slate-800 dark:text-slate-100">Kuis belum tersedia</h3>
+        <p className="text-sm text-slate-700 dark:text-slate-300">Soal untuk modul ini belum dapat dimuat.</p>
+        <TapButton variant="secondary" icon={<ArrowLeft className="w-4 h-4" />} onClick={onBack}>
+          Kembali ke Modul
+        </TapButton>
+      </div>
+    );
+  }
 
   // Final summary screen for quiz
   if (isFinished) {
@@ -127,7 +143,7 @@ export const QuizPlayView: React.FC<QuizPlayViewProps> = ({
               Bonus Bintang
             </span>
             <span className="text-2xl font-black text-amber-800 dark:text-amber-400 flex items-center gap-1 justify-center">
-              ⭐ {finalScore >= 80 ? '+2' : finalScore >= 40 ? '+1' : '+0'}
+              ⭐ +{starsEarned}
             </span>
           </div>
         </div>
@@ -157,18 +173,7 @@ export const QuizPlayView: React.FC<QuizPlayViewProps> = ({
   return (
     <div className="max-w-2xl mx-auto space-y-5 pb-12">
       {/* Header bar */}
-      <div className="flex items-center justify-between">
-        <button
-          onClick={() => {
-            sound.playPop();
-            onBack();
-          }}
-          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 font-bold text-xs min-h-[44px] cursor-pointer shadow-xs"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Keluar Kuis</span>
-        </button>
-
+        <div className="flex items-center justify-end">
         <div className="flex items-center gap-2">
           <span className="text-xl">{heroEmoji}</span>
           <span className="text-xs font-bold px-3 py-1 rounded-xl bg-sky-100 dark:bg-sky-950/50 text-sky-700 dark:text-sky-300">
@@ -230,6 +235,7 @@ export const QuizPlayView: React.FC<QuizPlayViewProps> = ({
                 <button
                   key={idx}
                   disabled={isAnswered}
+                  aria-pressed={isChosen}
                   onClick={() => handleSelectOption(idx)}
                   className={`w-full p-4 rounded-2xl border-2 text-left text-xs sm:text-sm transition-all flex items-center justify-between gap-3 min-h-[52px] cursor-pointer select-none ${btnStyle}`}
                 >

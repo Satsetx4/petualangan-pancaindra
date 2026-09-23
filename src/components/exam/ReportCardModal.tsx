@@ -11,15 +11,18 @@ import {
   Share2,
   BarChart2,
 } from 'lucide-react';
-import type { QuizQuestion, StudentProfile } from '../../types';
+import type { QuizQuestion, SenseType, StudentProfile } from '../../types';
 import { TapButton } from '../ui/TapButton';
 import { sound } from '../../lib/sound';
+import { calculateExamScore } from '../../lib/learning';
+import { SITE_URL } from '../../lib/site';
 
 interface ReportCardModalProps {
   profile: StudentProfile;
   questions: QuizQuestion[];
   userAnswers: Record<number, number>;
   timeSpentSeconds: number;
+  starsEarned: number;
   onRetry: () => void;
   onHome: () => void;
 }
@@ -29,21 +32,15 @@ export const ReportCardModal: React.FC<ReportCardModalProps> = ({
   questions,
   userAnswers,
   timeSpentSeconds,
+  starsEarned,
   onRetry,
   onHome,
 }) => {
   const [showReview, setShowReview] = useState<boolean>(false);
 
   const total = questions.length;
-  let correctCount = 0;
-
-  questions.forEach((q, idx) => {
-    if (userAnswers[idx] === q.correctIndex) {
-      correctCount += 1;
-    }
-  });
-
-  const percentage = Math.round((correctCount / total) * 100);
+  const score = calculateExamScore(questions, userAnswers);
+  const { correctCount, percentage, breakdown } = score;
 
   // Medal determination
   let medalEmoji = '🎖️';
@@ -69,23 +66,7 @@ export const ReportCardModal: React.FC<ReportCardModalProps> = ({
   }
 
   // Breakdown per sense
-  const sensesList = ['mata', 'telinga', 'lidah', 'hidung', 'kulit'] as const;
-  const breakdown: Record<string, { correct: number; total: number }> = {
-    mata: { correct: 0, total: 0 },
-    telinga: { correct: 0, total: 0 },
-    lidah: { correct: 0, total: 0 },
-    hidung: { correct: 0, total: 0 },
-    kulit: { correct: 0, total: 0 },
-  };
-
-  questions.forEach((q, idx) => {
-    if (breakdown[q.senseId]) {
-      breakdown[q.senseId].total += 1;
-      if (userAnswers[idx] === q.correctIndex) {
-        breakdown[q.senseId].correct += 1;
-      }
-    }
-  });
+  const sensesList: SenseType[] = ['mata', 'telinga', 'lidah', 'hidung', 'kulit'];
 
   const formatMinutes = (sec: number) => {
     const m = Math.floor(sec / 60);
@@ -101,7 +82,7 @@ export const ReportCardModal: React.FC<ReportCardModalProps> = ({
   const handleShareWhatsApp = () => {
     sound.playPop();
     const studentName = profile.name ? profile.name.trim() : 'Detektif Cilik';
-    const text = `Halo Bapak/Ibu Guru dan Bunda! 🌟\n\nSaya *${studentName}* telah menyelesaikan *Ujian Master Pancaindra (IPAS SD)* di aplikasi *Petualangan Pancaindra*!\n\n📊 Hasil Ujian:\n• Nilai Akhir: *${percentage}/100* (${correctCount} dari ${total} soal benar)\n• Penghargaan: *${medalName}* (${rankTitle})\n• Waktu Pengerjaan: ${formatMinutes(timeSpentSeconds)}\n\nAyo coba belajar dan ikuti ujiannya di: https://petualangan-pancaindra.vercel.app/`;
+    const text = `Halo Bapak/Ibu Guru dan Bunda! 🌟\n\nSaya *${studentName}* telah menyelesaikan *Ujian Master Pancaindra (IPAS SD)* di aplikasi *Petualangan Pancaindra*!\n\n📊 Hasil Ujian:\n• Nilai Akhir: *${percentage}/100* (${correctCount} dari ${total} soal benar)\n• Penghargaan: *${medalName}* (${rankTitle})\n• Waktu Pengerjaan: ${formatMinutes(timeSpentSeconds)}\n\nAyo coba belajar dan ikuti ujiannya di: ${SITE_URL}`;
     const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
     window.open(url, '_blank', 'noopener,noreferrer');
   };
@@ -120,7 +101,7 @@ export const ReportCardModal: React.FC<ReportCardModalProps> = ({
             Rapor Prestasi Detektif Pancaindra
           </span>
           <h3 className="text-2xl sm:text-3xl font-black text-slate-800 dark:text-slate-100 font-display">
-            Sertifikat Kelulusan Ujian Master
+            Hasil Ujian Master
           </h3>
           <p className="text-xs text-slate-700 dark:text-slate-300">
             Diberikan dengan bangga kepada:
@@ -132,7 +113,7 @@ export const ReportCardModal: React.FC<ReportCardModalProps> = ({
           <span className="text-4xl">{profile.avatarEmoji}</span>
           <div className="text-left">
             <h4 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white font-display">
-              {profile.name || 'Detektif Cilik'}
+              {profile.name || 'Peserta'}
             </h4>
             <span className="text-xs font-bold text-amber-800 dark:text-amber-400">
               Gelar: {rankTitle}
@@ -158,7 +139,7 @@ export const ReportCardModal: React.FC<ReportCardModalProps> = ({
         {/* Big Score Counter */}
         <div className="grid grid-cols-3 gap-2 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-center">
           <div>
-            <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300 block">
+            <span className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
               Nilai Akhir
             </span>
             <span className="text-2xl sm:text-3xl font-black text-sky-600 dark:text-sky-400 font-display">
@@ -166,7 +147,7 @@ export const ReportCardModal: React.FC<ReportCardModalProps> = ({
             </span>
           </div>
           <div>
-            <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300 block">
+            <span className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
               Benar
             </span>
             <span className="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400 font-display">
@@ -174,11 +155,11 @@ export const ReportCardModal: React.FC<ReportCardModalProps> = ({
             </span>
           </div>
           <div>
-            <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300 block">
+            <span className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
               Bintang
             </span>
             <span className="text-2xl sm:text-3xl font-black text-amber-500 font-display">
-              ⭐ {percentage >= 85 ? '+5' : percentage >= 70 ? '+3' : '+2'}
+              ⭐ +{starsEarned}
             </span>
           </div>
         </div>

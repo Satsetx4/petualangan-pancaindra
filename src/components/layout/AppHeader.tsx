@@ -1,13 +1,14 @@
 import React from 'react';
 import { ArrowLeft, Moon, Sun, Volume2, VolumeX, Star, Compass } from 'lucide-react';
-import type { UserProgress } from '../../types';
+import type { AppView, UserProgress } from '../../types';
 import { sound } from '../../lib/sound';
 
 interface AppHeaderProps {
   progress: UserProgress;
-  currentView: string;
-  onNavigateHome: () => void;
-  onNavigateBack?: () => void;
+  currentView: AppView;
+  showBackButton?: boolean;
+  showProfileButton?: boolean;
+  onNavigateBack: () => void;
   onOpenProfile: () => void;
   onToggleSound: () => void;
   onToggleTheme: () => void;
@@ -17,7 +18,8 @@ interface AppHeaderProps {
 export const AppHeader: React.FC<AppHeaderProps> = ({
   progress,
   currentView,
-  onNavigateHome,
+  showBackButton = currentView !== 'home' && currentView !== 'exam' && currentView !== 'exam_result' && currentView !== 'not_found',
+  showProfileButton = currentView !== 'exam',
   onNavigateBack,
   onOpenProfile,
   onToggleSound,
@@ -26,11 +28,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
 }) => {
   const handleBack = () => {
     sound.playPop();
-    if (onNavigateBack) {
-      onNavigateBack();
-    } else {
-      onNavigateHome();
-    }
+    onNavigateBack();
   };
 
   return (
@@ -38,7 +36,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
       <div className="max-w-4xl mx-auto px-3.5 sm:px-6 h-16 flex items-center justify-between gap-2">
         {/* Left: Brand or Back Button */}
         <div className="flex items-center gap-2">
-          {currentView !== 'home' ? (
+          {showBackButton ? (
             <button
               onClick={handleBack}
               className="flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 font-bold text-sm min-h-[44px] min-w-[44px] cursor-pointer transition-colors shadow-sm"
@@ -48,10 +46,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
               <span className="hidden sm:inline">Kembali</span>
             </button>
           ) : (
-            <div
-              onClick={onNavigateHome}
-              className="flex items-center gap-2.5 cursor-pointer select-none"
-            >
+            <div className="flex items-center gap-2.5 select-none">
               <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-400 via-sky-500 to-indigo-600 flex items-center justify-center text-white shadow-md">
                 <Compass className="w-5 h-5 text-white" />
               </div>
@@ -87,26 +82,28 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           </div>
 
           {/* Profile Chip Button */}
-          <button
+          {showProfileButton && <button
             onClick={() => {
               sound.playPop();
               onOpenProfile();
             }}
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 min-h-[40px] cursor-pointer transition-colors shadow-xs"
             title="Buka Profil Siswa"
+            aria-label={progress.profile.name ? `Buka profil ${progress.profile.name}` : 'Buka profil siswa'}
           >
             <span className="text-lg">{progress.profile.avatarEmoji}</span>
-            <span className="text-xs font-bold max-w-[80px] truncate hidden xs:inline">
+            <span className="text-xs font-bold max-w-[80px] truncate hidden sm:inline">
               {progress.profile.name}
             </span>
-          </button>
+          </button>}
 
           {/* Sound Toggle */}
           <button
             onClick={onToggleSound}
             className="w-10 h-10 rounded-2xl flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 cursor-pointer transition-colors shadow-xs"
             title={progress.soundEnabled ? 'Matikan Suara' : 'Nyalakan Suara'}
-            aria-label="Toggle Sound"
+            aria-label={progress.soundEnabled ? 'Matikan suara' : 'Nyalakan suara'}
+            aria-pressed={progress.soundEnabled}
           >
             {progress.soundEnabled ? (
               <Volume2 className="w-4 h-4 text-emerald-500" />
@@ -120,7 +117,8 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
             onClick={onToggleTheme}
             className="w-10 h-10 rounded-2xl flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 cursor-pointer transition-colors shadow-xs"
             title={progress.theme === 'dark' ? 'Mode Terang' : 'Mode Gelap'}
-            aria-label="Toggle Theme"
+            aria-label={progress.theme === 'dark' ? 'Ganti ke mode terang' : 'Ganti ke mode gelap'}
+            aria-pressed={progress.theme === 'dark'}
           >
             {progress.theme === 'dark' ? (
               <Sun className="w-4 h-4 text-amber-400" />

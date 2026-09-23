@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
-  ArrowLeft,
   CheckCircle2,
   Sparkles,
   HelpCircle,
@@ -20,7 +19,6 @@ import { sound } from '../../lib/sound';
 interface LessonViewerProps {
   module: SenseModule;
   isCompleted: boolean;
-  onBack: () => void;
   onCompleteLesson: () => void;
   onStartQuiz: () => void;
 }
@@ -28,7 +26,6 @@ interface LessonViewerProps {
 export const LessonViewer: React.FC<LessonViewerProps> = ({
   module,
   isCompleted,
-  onBack,
   onCompleteLesson,
   onStartQuiz,
 }) => {
@@ -49,18 +46,7 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({
         animate={{ opacity: 1, y: 0 }}
         className={`rounded-3xl border-2 p-5 sm:p-7 bg-gradient-to-br ${module.themeColor.bg} ${module.themeColor.border} space-y-4 shadow-sm`}
       >
-        <div className="flex items-center justify-between">
-          <button
-            onClick={() => {
-              sound.playPop();
-              onBack();
-            }}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-white/80 dark:bg-slate-800/80 hover:bg-white text-slate-700 dark:text-slate-200 font-bold text-xs min-h-[44px] cursor-pointer shadow-xs border border-slate-200/60 dark:border-slate-700"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Kembali ke Beranda</span>
-          </button>
-
+        <div className="flex items-center justify-end">
           {isCompleted ? (
             <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-emerald-500 text-white text-xs font-bold shadow-xs">
               <CheckCircle2 className="w-3.5 h-3.5" />
@@ -113,7 +99,7 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({
               }}
               className={`p-3 rounded-2xl border-2 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer select-none min-h-[48px] ${
                 isActive
-                  ? 'bg-sky-500 text-white border-sky-600 shadow-md scale-102'
+                  ? 'bg-sky-500 text-white border-sky-600 shadow-md scale-[1.02]'
                   : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50'
               }`}
             >

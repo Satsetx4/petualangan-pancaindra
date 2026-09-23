@@ -1,10 +1,11 @@
 import React from 'react';
-import { Home, BookOpen, HelpCircle, Award, User } from 'lucide-react';
+import { Home, BookOpen, Award, User } from 'lucide-react';
 import { sound } from '../../lib/sound';
+import type { AppTab } from '../../types';
 
 interface MobileBottomNavProps {
-  currentTab: string;
-  onSelectTab: (tab: string) => void;
+  currentTab: AppTab;
+  onSelectTab: (tab: AppTab) => void;
   hideDuringQuizOrExam?: boolean;
 }
 
@@ -15,17 +16,16 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
 }) => {
   if (hideDuringQuizOrExam) return null;
 
-  const navItems = [
+  const navItems: { id: AppTab; label: string; icon: typeof Home }[] = [
     { id: 'home', label: 'Beranda', icon: Home },
-    { id: 'modules', label: '5 Modul', icon: BookOpen },
-    { id: 'quiz_select', label: 'Latihan', icon: HelpCircle },
+    { id: 'modules', label: 'Modul', icon: BookOpen },
     { id: 'exam', label: 'Ujian', icon: Award },
     { id: 'profile', label: 'Profil', icon: User },
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200/80 dark:border-slate-800 pb-safe sm:hidden">
-      <div className="max-w-md mx-auto grid grid-cols-5 h-16">
+    <nav aria-label="Navigasi utama" className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200/80 dark:border-slate-800 pb-safe sm:hidden">
+      <div className="max-w-md mx-auto grid grid-cols-4 h-16">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = currentTab === item.id;
@@ -51,7 +51,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
               >
                 <Icon className="w-5 h-5" />
               </div>
-              <span className="text-[11px] leading-none">{item.label}</span>
+              <span className="text-xs leading-none">{item.label}</span>
               {isActive && (
                 <div className="absolute bottom-1 w-6 h-1 rounded-full bg-sky-500" />
               )}

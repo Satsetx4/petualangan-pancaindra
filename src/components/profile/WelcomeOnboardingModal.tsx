@@ -4,6 +4,7 @@ import { Sparkles, Compass } from 'lucide-react';
 import { TapButton } from '../ui/TapButton';
 import { sound } from '../../lib/sound';
 import { triggerConfetti } from '../../lib/confetti';
+import { AccessibleDialog } from '../ui/AccessibleDialog';
 
 interface WelcomeOnboardingModalProps {
   onComplete: (name: string, avatarId: string, avatarEmoji: string) => void;
@@ -49,11 +50,12 @@ export const WelcomeOnboardingModal: React.FC<WelcomeOnboardingModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        className="max-w-md w-full rounded-3xl bg-white dark:bg-slate-900 border-2 border-amber-300 dark:border-amber-700/80 p-6 sm:p-7 space-y-5 shadow-2xl relative my-8"
-      >
+      <AccessibleDialog labelledBy="welcome-title" describedBy="welcome-description" escapeDismissible={false} className="max-w-md w-full my-8">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          className="rounded-3xl bg-white dark:bg-slate-900 border-2 border-amber-300 dark:border-amber-700/80 p-6 sm:p-7 space-y-5 shadow-2xl relative"
+        >
         {/* Welcome Header */}
         <div className="text-center space-y-2">
           <div className="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-br from-amber-400 to-emerald-500 flex items-center justify-center text-white shadow-md">
@@ -63,10 +65,10 @@ export const WelcomeOnboardingModal: React.FC<WelcomeOnboardingModalProps> = ({
             <span className="text-xs font-black tracking-wider uppercase text-amber-600 dark:text-amber-400">
               Markas Detektif IPAS SD
             </span>
-            <h3 className="text-2xl font-black text-slate-900 dark:text-white font-display">
+            <h3 id="welcome-title" className="text-2xl font-black text-slate-900 dark:text-white font-display">
               Selamat Datang, Calon Detektif!
             </h3>
-            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mt-1">
+            <p id="welcome-description" className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mt-1">
               Kenalkan dirimu dulu yuk, agar lencana pulau dan sertifikat ujian nanti tercetak atas namamu sendiri!
             </p>
           </div>
@@ -75,19 +77,23 @@ export const WelcomeOnboardingModal: React.FC<WelcomeOnboardingModalProps> = ({
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Name Input */}
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
+            <label htmlFor="welcome-name" className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
               Nama Panggilan Siswa <span className="text-rose-500">*</span>
             </label>
             <input
+              id="welcome-name"
               type="text"
               autoFocus
+              required
               value={nameInput}
               maxLength={20}
               onChange={(e) => {
                 setNameInput(e.target.value);
                 if (errorMessage) setErrorMessage('');
               }}
-              placeholder="Contoh: Aisyah, Budi, Farhan..."
+              placeholder="Tulis nama panggilan"
+              aria-invalid={Boolean(errorMessage)}
+              aria-describedby={errorMessage ? 'welcome-name-error' : undefined}
               className={`w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800 border-2 font-bold text-sm text-slate-800 dark:text-white focus:outline-none transition-colors ${
                 errorMessage
                   ? 'border-rose-400 focus:border-rose-500'
@@ -95,7 +101,7 @@ export const WelcomeOnboardingModal: React.FC<WelcomeOnboardingModalProps> = ({
               }`}
             />
             {errorMessage && (
-              <p className="text-xs font-bold text-rose-500 animate-shake">
+              <p id="welcome-name-error" role="alert" className="text-sm font-bold text-rose-500 animate-shake">
                 {errorMessage}
               </p>
             )}
@@ -124,7 +130,7 @@ export const WelcomeOnboardingModal: React.FC<WelcomeOnboardingModalProps> = ({
                     }`}
                   >
                     <span className="text-2xl">{av.emoji}</span>
-                    <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300 leading-tight text-center">
+                    <span className="text-xs font-bold text-slate-700 dark:text-slate-300 leading-tight text-center">
                       {av.label}
                     </span>
                   </button>
@@ -146,7 +152,8 @@ export const WelcomeOnboardingModal: React.FC<WelcomeOnboardingModalProps> = ({
             </TapButton>
           </div>
         </form>
-      </motion.div>
+        </motion.div>
+      </AccessibleDialog>
     </div>
   );
 };

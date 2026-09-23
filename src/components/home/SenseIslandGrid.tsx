@@ -35,7 +35,8 @@ export const SenseIslandGrid: React.FC<SenseIslandGridProps> = ({
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {SENSES_MODULES.map((sense, idx) => {
-          const isCompleted = progress.completedLessons.includes(sense.id);
+          const isCompleted = progress.lessonCompleted.includes(sense.id);
+          const isMastered = progress.mastered.includes(sense.id);
           const bestScore = progress.quizBestScores[sense.id];
 
           return (
@@ -46,11 +47,11 @@ export const SenseIslandGrid: React.FC<SenseIslandGridProps> = ({
               transition={{ delay: idx * 0.08 }}
               className={`rounded-3xl border-2 p-5 transition-all shadow-sm hover:shadow-md bg-gradient-to-br ${sense.themeColor.bg} ${sense.themeColor.border} relative overflow-hidden`}
             >
-              {/* Completed island badge tag */}
-              {isCompleted && (
-                <div className="absolute top-3 right-3 flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500 text-white text-[11px] font-bold shadow-xs">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  <span>Selesai</span>
+              {/* Lesson completion badge */}
+              {(isCompleted || isMastered) && (
+                <div className="absolute top-3 right-3 flex flex-col items-end gap-1">
+                  {isCompleted && <span className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-600 text-white text-xs font-bold shadow-xs"><CheckCircle2 aria-hidden="true" className="w-4 h-4" />Materi selesai</span>}
+                  {isMastered && <span className="px-2.5 py-1 rounded-full bg-indigo-600 text-white text-xs font-bold shadow-xs">Kuis dikuasai</span>}
                 </div>
               )}
 
@@ -61,7 +62,7 @@ export const SenseIslandGrid: React.FC<SenseIslandGridProps> = ({
                     {sense.heroEmoji}
                   </div>
                   <div>
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                    <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
                       Pulau {sense.nickname}
                     </span>
                     <h4 className="text-lg font-black text-slate-800 dark:text-slate-100 leading-tight">
