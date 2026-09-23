@@ -40,7 +40,7 @@ export const HowItWorksFlow: React.FC<HowItWorksFlowProps> = ({ steps, organName
     <div className="bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 rounded-3xl p-4 sm:p-6 space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <span className="text-[11px] font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400">
+          <span className="text-xs font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400">
             Simulasi Interaktif
           </span>
           <h4 className="text-base sm:text-lg font-black text-slate-800 dark:text-slate-100">
@@ -65,6 +65,9 @@ export const HowItWorksFlow: React.FC<HowItWorksFlowProps> = ({ steps, organName
           return (
             <button
               key={s.step}
+              type="button"
+              aria-label={`Tampilkan langkah ${s.step}: ${s.title}`}
+              aria-current={isActive ? 'step' : undefined}
               onClick={() => {
                 sound.playPop();
                 setCurrentStepIndex(idx);

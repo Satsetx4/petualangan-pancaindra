@@ -1,4 +1,5 @@
 import type { QuizQuestion, SenseType } from '../types';
+import { shuffleArray, shuffleQuestionOptions } from '../lib/learning';
 
 export const QUESTIONS_BANK: QuizQuestion[] = [
   // --- MATA (Indra Penglihat) ---
@@ -125,21 +126,31 @@ export const QUESTIONS_BANK: QuizQuestion[] = [
     id: 'l-1',
     senseId: 'lidah',
     type: 'single',
-    question: 'Bagian ujung depan lidah adalah area yang paling peka/sensitif untuk mengecap rasa...',
-    options: ['Pahit', 'Asam', 'Manis', 'Asin'],
-    correctIndex: 2,
-    explanation: 'Tepat! Ujung lidah paling sensitif terhadap rasa manis, seperti saat kita mencicipi es krim, semangka, atau madu lezat.',
-    funFactSnippet: 'Saat bayi baru lahir, rasa manis adalah rasa pertama yang paling mudah diterima!',
+    question: 'Manakah kelompok yang berisi lima rasa dasar yang dapat kita kenali?',
+    options: [
+      'Manis, asin, asam, pahit, dan umami (gurih)',
+      'Manis, pedas, panas, dingin, dan gurih',
+      'Asin, pahit, pedas, wangi, dan asam',
+      'Manis, asin, renyah, lembut, dan umami',
+    ],
+    correctIndex: 0,
+    explanation: 'Benar! Lima rasa dasar adalah manis, asin, asam, pahit, dan umami (gurih). Pedas adalah sensasi panas, sedangkan renyah dan lembut adalah tekstur.',
+    funFactSnippet: 'Umami sering terasa gurih, misalnya pada kaldu, jamur, atau tomat matang.',
   },
   {
     id: 'l-2',
     senseId: 'lidah',
     type: 'single',
-    question: 'Rasa pahit seperti pada jamu tradisional, kopi tanpa gula, atau sayur pare paling peka dirasakan di bagian lidah...',
-    options: ['Ujung depan lidah', 'Samping depan lidah', 'Pangkal / belakang lidah', 'Bawah lidah'],
-    correctIndex: 2,
-    explanation: 'Hebat! Pangkal atau bagian belakang lidah paling sensitif terhadap rasa pahit sebagai mekanisme alami melindungi tubuh dari racun di alam.',
-    funFactSnippet: 'Banyak tanaman beracun di hutan rasanya pahit, sehingga lidah berevolusi mengenali rasa pahit di pangkal sebelum tertelan.',
+    question: 'Bagaimana kuncup pengecap di permukaan lidah mengenali rasa?',
+    options: [
+      'Rasa baru dapat dikenali setelah makanan ditelan',
+      'Kuncup pengecap di berbagai bagian lidah dapat mengenali beragam rasa',
+      'Rasa hanya dikenali oleh ujung lidah',
+      'Rasa hanya dikenali setelah makanan masuk ke tenggorokan',
+    ],
+    correctIndex: 1,
+    explanation: 'Tepat! Kuncup pengecap di berbagai bagian lidah dapat mengenali beragam rasa. Lidah tidak dibagi menjadi zona khusus yang hanya mengenali satu rasa.',
+    funFactSnippet: 'Papila adalah bintil kecil di permukaan lidah; sebagian papila memiliki kuncup pengecap.',
   },
   {
     id: 'l-3',
@@ -150,10 +161,10 @@ export const QUESTIONS_BANK: QuizQuestion[] = [
       'Bukan, pedas adalah sensasi panas dan terbakar pada reseptor lidah',
       'Ya, pedas adalah rasa utama kelima bersama manis',
       'Ya, pedas berasal dari kuncup pengecap khusus cabai',
-      'Ya, pedas hanya bisa dirasakan di bagian bawah lidah',
+      'Ya, pedas adalah rasa yang sama dengan pahit',
     ],
     correctIndex: 0,
-    explanation: 'Super cerdas! Pedas bukan rasa primer melainkan sensasi panas terbakar akibat zat kimia capsaicin pada cabai yang merangsang saraf nyeri di mulut.',
+    explanation: 'Super cerdas! Pedas bukan salah satu dari lima rasa dasar. Capsaicin pada cabai menimbulkan sensasi panas atau terbakar di mulut.',
     funFactSnippet: 'Karena itulah kalau mata atau kulitmu terkena cabai juga terasa perih dan panas!',
   },
   {
@@ -173,7 +184,7 @@ export const QUESTIONS_BANK: QuizQuestion[] = [
     question: 'Makanan seperti buah lemon, cuka makan, dan jeruk nipis memiliki cita rasa...',
     options: ['Manis', 'Asam', 'Asin', 'Pahit'],
     correctIndex: 1,
-    explanation: 'Tepat! Lemon dan cuka memiliki cita rasa asam yang paling peka dirasakan oleh sisi samping belakang lidah.',
+    explanation: 'Tepat! Lemon dan cuka memiliki cita rasa asam. Kuncup pengecap di berbagai bagian lidah dapat mengenali rasa asam.',
     funFactSnippet: 'Rasa asam merangsang kelenjar liur memproduksi lebih banyak air liur di dalam mulut kita secara otomatis!',
   },
 
@@ -318,21 +329,27 @@ export const QUESTIONS_BANK: QuizQuestion[] = [
 ];
 
 // Helper to get random 15 questions for the Master Exam (3 questions from each sense)
-export const getRandomExamQuestions = (): QuizQuestion[] => {
+export const getRandomExamQuestions = (random: () => number = Math.random): QuizQuestion[] => {
   const senses: SenseType[] = ['mata', 'telinga', 'lidah', 'hidung', 'kulit'];
   const selected: QuizQuestion[] = [];
 
   senses.forEach((sense) => {
     const list = QUESTIONS_BANK.filter((q) => q.senseId === sense);
-    // Shuffle and pick 3
-    const shuffled = [...list].sort(() => Math.random() - 0.5);
+    const shuffled = shuffleArray(list, random);
     selected.push(...shuffled.slice(0, 3));
   });
 
-  // Final shuffle of the 15 selected questions
-  return selected.sort(() => Math.random() - 0.5);
+  return shuffleArray(selected, random).map((question) =>
+    shuffleQuestionOptions(question, random),
+  );
 };
 
+export const hasExamQuestionSet = (): boolean =>
+  ['mata', 'telinga', 'lidah', 'hidung', 'kulit'].every(
+    (senseId) => QUESTIONS_BANK.filter((question) => question.senseId === senseId).length >= 3,
+  );
+
 export const getQuestionsForSense = (senseId: SenseType): QuizQuestion[] => {
+  if (!['mata', 'telinga', 'lidah', 'hidung', 'kulit'].includes(senseId)) return [];
   return QUESTIONS_BANK.filter((q) => q.senseId === senseId);
 };

@@ -1,6 +1,8 @@
 // Web Audio API Playful Synthesizer for Kids Edu App
 // Zero external mp3 dependencies, 100% offline & instantaneous
 
+type AudioWindow = Window & { webkitAudioContext?: typeof AudioContext };
+
 class SoundController {
   private ctx: AudioContext | null = null;
   public enabled: boolean = true;
@@ -9,7 +11,7 @@ class SoundController {
     if (typeof window === 'undefined') return null;
     try {
       if (!this.ctx) {
-        const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+        const AudioCtx = window.AudioContext || (window as AudioWindow).webkitAudioContext;
         if (AudioCtx) {
           this.ctx = new AudioCtx();
         }

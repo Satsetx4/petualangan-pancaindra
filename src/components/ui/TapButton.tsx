@@ -1,13 +1,15 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { sound } from '../../lib/sound';
 
-interface TapButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface TapButtonProps {
   variant?: 'primary' | 'secondary' | 'success' | 'danger' | 'ghost' | 'amber';
   size?: 'sm' | 'md' | 'lg';
   children: React.ReactNode;
   icon?: React.ReactNode;
   disabled?: boolean;
+  type?: 'button' | 'submit' | 'reset';
+  onClick?: React.MouseEventHandler<HTMLButtonElement>;
+  className?: string;
 }
 
 export const TapButton: React.FC<TapButtonProps> = ({
@@ -16,13 +18,12 @@ export const TapButton: React.FC<TapButtonProps> = ({
   children,
   icon,
   disabled = false,
+  type = 'button',
   onClick,
   className = '',
-  ...props
 }) => {
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (disabled) return;
-    sound.playPop();
     if (onClick) onClick(e);
   };
 
@@ -52,10 +53,10 @@ export const TapButton: React.FC<TapButtonProps> = ({
       whileTap={disabled ? undefined : { scale: 0.96 }}
       onClick={handleClick}
       disabled={disabled}
+      type={type}
       className={`inline-flex items-center justify-center cursor-pointer select-none transition-colors duration-100 ${
         variantStyles[variant]
       } ${sizeStyles[size]} ${disabled ? 'opacity-50 cursor-not-allowed border-b-0' : ''} ${className}`}
-      {...(props as object)}
     >
       {icon && <span className="shrink-0">{icon}</span>}
       <span>{children}</span>

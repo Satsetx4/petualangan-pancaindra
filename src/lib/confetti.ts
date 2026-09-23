@@ -19,6 +19,7 @@ export const triggerConfetti = () => {
 
 export const triggerGrandCelebration = () => {
   try {
+    if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     if (typeof confetti === 'function') {
       const duration = 2.5 * 1000;
       const animationEnd = Date.now() + duration;

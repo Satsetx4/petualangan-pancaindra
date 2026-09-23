@@ -1,177 +1,134 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, Flame } from 'lucide-react';
+import { Flame, Sparkles } from 'lucide-react';
 import { sound } from '../../lib/sound';
 
-interface TasteZone {
-  id: string;
-  name: string;
-  locationText: string;
-  color: string;
-  bgLight: string;
-  borderClass: string;
-  examples: string[];
-  description: string;
-  emoji: string;
-}
+const TASTES = [
+  {
+    id: 'manis',
+    name: 'Manis',
+    emoji: '🍉',
+    color: 'bg-rose-500 text-white',
+    background: 'bg-rose-50 dark:bg-rose-950/30',
+    border: 'border-rose-300 dark:border-rose-800',
+    examples: 'Buah matang, madu, dan beberapa kue.',
+  },
+  {
+    id: 'asin',
+    name: 'Asin',
+    emoji: '🧂',
+    color: 'bg-amber-500 text-white',
+    background: 'bg-amber-50 dark:bg-amber-950/30',
+    border: 'border-amber-300 dark:border-amber-800',
+    examples: 'Garam dan makanan yang dibumbui garam.',
+  },
+  {
+    id: 'asam',
+    name: 'Asam',
+    emoji: '🍋',
+    color: 'bg-emerald-500 text-white',
+    background: 'bg-emerald-50 dark:bg-emerald-950/30',
+    border: 'border-emerald-300 dark:border-emerald-800',
+    examples: 'Lemon, jeruk nipis, dan yogurt tawar.',
+  },
+  {
+    id: 'pahit',
+    name: 'Pahit',
+    emoji: '☕',
+    color: 'bg-indigo-500 text-white',
+    background: 'bg-indigo-50 dark:bg-indigo-950/30',
+    border: 'border-indigo-300 dark:border-indigo-800',
+    examples: 'Kopi tanpa gula dan beberapa sayuran seperti pare.',
+  },
+  {
+    id: 'umami',
+    name: 'Umami (gurih)',
+    emoji: '🍄',
+    color: 'bg-sky-600 text-white',
+    background: 'bg-sky-50 dark:bg-sky-950/30',
+    border: 'border-sky-300 dark:border-sky-800',
+    examples: 'Kaldu, jamur, tomat matang, dan keju.',
+  },
+] as const;
 
 export const TasteMapWidget: React.FC = () => {
-  const [selectedZone, setSelectedZone] = useState<string>('manis');
-
-  const zones: Record<string, TasteZone> = {
-    manis: {
-      id: 'manis',
-      name: 'Rasa Manis',
-      locationText: 'Ujung Depan Lidah',
-      color: 'bg-rose-500 text-white',
-      bgLight: 'bg-rose-50 dark:bg-rose-950/30',
-      borderClass: 'border-rose-300 dark:border-rose-800',
-      emoji: '🍉',
-      examples: ['Semangka manis', 'Permen buah', 'Madu lezat', 'Kue bolu'],
-      description:
-        'Ujung lidah adalah area paling peka mendeteksi rasa manis dari gula alami maupun pemanis makanan.',
-    },
-    asin: {
-      id: 'asin',
-      name: 'Rasa Asin',
-      locationText: 'Sisi Samping Depan Lidah',
-      color: 'bg-amber-500 text-white',
-      bgLight: 'bg-amber-50 dark:bg-amber-950/30',
-      borderClass: 'border-amber-300 dark:border-amber-800',
-      emoji: '🧀',
-      examples: ['Keju gurih', 'Ikan asin kering', 'Keripik kentang', 'Garam dapur'],
-      description:
-        'Samping depan lidah sangat sensitif mengenali mineral garam natrium yang dibutuhkan tubuh dalam batas wajar.',
-    },
-    asam: {
-      id: 'asam',
-      name: 'Rasa Asam',
-      locationText: 'Sisi Samping Belakang Lidah',
-      color: 'bg-emerald-500 text-white',
-      bgLight: 'bg-emerald-50 dark:bg-emerald-950/30',
-      borderClass: 'border-emerald-300 dark:border-emerald-800',
-      emoji: '🍋',
-      examples: ['Buah lemon segar', 'Jeruk nipis', 'Cuka makan', 'Asam jawa'],
-      description:
-        'Sisi samping belakang lidah langsung merangsang kelenjar liur ketika mendeteksi asam buah alami.',
-    },
-    pahit: {
-      id: 'pahit',
-      name: 'Rasa Pahit',
-      locationText: 'Pangkal Belakang Lidah',
-      color: 'bg-indigo-500 text-white',
-      bgLight: 'bg-indigo-50 dark:bg-indigo-950/30',
-      borderClass: 'border-indigo-300 dark:border-indigo-800',
-      emoji: '☕',
-      examples: ['Kopi hitam tanpa gula', 'Sayur pare', 'Obat tablet', 'Jamu tradisional'],
-      description:
-        'Pangkal lidah sangat peka rasa pahit sebagai alarm pertahanan alami tubuh terhadap racun di alam.',
-    },
-  };
-
-  const current = zones[selectedZone];
+  const [selectedTasteId, setSelectedTasteId] = useState<string>('manis');
+  const current = TASTES.find((taste) => taste.id === selectedTasteId) ?? TASTES[0];
 
   return (
-    <div className="bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 rounded-3xl p-4 sm:p-6 space-y-5">
+    <section
+      aria-labelledby="taste-widget-title"
+      className="bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 rounded-3xl p-4 sm:p-6 space-y-5"
+    >
       <div className="text-center space-y-1">
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-100 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 text-xs font-bold">
-          <Sparkles className="w-3.5 h-3.5" />
-          Peta Interaktif Rasa Lidah
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-100 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 text-sm font-bold">
+          <Sparkles aria-hidden="true" className="w-4 h-4" />
+          Lima Rasa Dasar
         </span>
-        <h4 className="text-base sm:text-lg font-black text-slate-800 dark:text-slate-100">
-          Sentuh Bagian Lidah untuk Mengetahui Kepekaan Rasa!
+        <h4 id="taste-widget-title" className="text-base sm:text-lg font-black text-slate-800 dark:text-slate-100">
+          Mengenal 5 Rasa Dasar
         </h4>
-        <p className="text-xs text-slate-700 dark:text-slate-300">
-          Lidah memiliki zona yang lebih dominan dalam merasakan cita rasa tertentu.
+        <p className="text-sm text-slate-700 dark:text-slate-300">
+          Pilih rasa untuk melihat contoh makanan. Kuncup pengecap di berbagai bagian lidah dapat mengenali berbagai rasa.
         </p>
       </div>
 
-      {/* Selector Buttons */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-        {Object.values(zones).map((z) => {
-          const isSelected = selectedZone === z.id;
+      <div role="group" aria-label="Pilih rasa dasar" className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+        {TASTES.map((taste) => {
+          const isSelected = current.id === taste.id;
           return (
             <button
-              key={z.id}
+              key={taste.id}
+              type="button"
+              aria-pressed={isSelected}
               onClick={() => {
                 sound.playPop();
-                setSelectedZone(z.id);
+                setSelectedTasteId(taste.id);
               }}
-              className={`p-2.5 rounded-2xl border-2 font-bold text-xs flex flex-col items-center gap-1 transition-all cursor-pointer select-none ${
+              className={`p-3 rounded-2xl border-2 font-bold text-sm flex flex-col items-center gap-1 transition-all cursor-pointer select-none min-h-20 ${
                 isSelected
-                  ? `${z.color} border-transparent shadow-md scale-102`
+                  ? `${taste.color} border-transparent shadow-md scale-[1.02]`
                   : 'bg-slate-50 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100'
               }`}
             >
-              <span className="text-xl">{z.emoji}</span>
-              <span>{z.name}</span>
+              <span aria-hidden="true" className="text-2xl">{taste.emoji}</span>
+              <span>{taste.name}</span>
             </button>
           );
         })}
       </div>
 
-      {/* Interactive Detail Box */}
       <AnimatePresence mode="wait">
         <motion.div
           key={current.id}
-          initial={{ opacity: 0, y: 10 }}
+          initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          className={`rounded-2xl p-4 sm:p-5 border-2 ${current.bgLight} ${current.borderClass} space-y-3`}
+          exit={{ opacity: 0, y: -8 }}
+          aria-live="polite"
+          className={`rounded-2xl p-4 sm:p-5 border-2 ${current.background} ${current.border} space-y-2`}
         >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="text-2xl">{current.emoji}</span>
-              <div>
-                <h5 className="font-black text-slate-800 dark:text-slate-100 text-sm sm:text-base">
-                  {current.name}
-                </h5>
-                <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                  📍 Lokasi Paling Peka: {current.locationText}
-                </span>
-              </div>
-            </div>
-            <span className="px-2.5 py-1 rounded-xl bg-white dark:bg-slate-800 text-[11px] font-bold shadow-xs">
-              Zona Sensitif
-            </span>
-          </div>
-
-          <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
-            {current.description}
+          <h5 className="font-black text-slate-800 dark:text-slate-100 text-base">
+            {current.emoji} Rasa {current.name}
+          </h5>
+          <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+            Contoh: {current.examples}
           </p>
-
-          <div className="pt-1">
-            <span className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
-              Contoh Makanan & Minuman:
-            </span>
-            <div className="flex flex-wrap gap-2">
-              {current.examples.map((item, idx) => (
-                <span
-                  key={idx}
-                  className="px-2.5 py-1 rounded-xl bg-white/80 dark:bg-slate-800/80 text-xs font-semibold text-slate-700 dark:text-slate-200 border border-slate-200/60 dark:border-slate-700"
-                >
-                  ✓ {item}
-                </span>
-              ))}
-            </div>
-          </div>
         </motion.div>
       </AnimatePresence>
 
-      {/* Scientific Myth Buster Callout */}
-      <div className="rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 p-3.5 flex items-start gap-3 text-xs">
-        <div className="p-1.5 rounded-xl bg-amber-500 text-white shrink-0">
+      <div className="rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 p-4 flex items-start gap-3 text-sm">
+        <div aria-hidden="true" className="p-1.5 rounded-xl bg-amber-500 text-white shrink-0">
           <Flame className="w-4 h-4" />
         </div>
         <div className="space-y-1">
           <h6 className="font-bold text-amber-900 dark:text-amber-200">
-            Fakta Ilmiah: Mengapa Pedas Bukan Termasuk Rasa?
+            Pedas adalah sensasi, bukan rasa dasar
           </h6>
           <p className="text-amber-800/90 dark:text-amber-300/90 leading-relaxed">
-            Pedas bukan rasa primer! Sensasi pedas berasal dari zat capsaicin pada cabai yang merangsang reseptor panas dan nyeri di lidah, lalu mengirim sinyal "panas terbakar" ke otak kita.
+            Zat capsaicin pada cabai menimbulkan sensasi panas atau terbakar di mulut. Itu berbeda dari lima rasa dasar.
           </p>
         </div>
       </div>
-    </div>
+    </section>
   );
 };

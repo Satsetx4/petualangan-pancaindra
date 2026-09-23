@@ -1,21 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import type { SenseType, UserProgress, QuizQuestion, StudentProfile } from './types';
+import React, { useEffect, useState } from 'react';
+import { AnimatePresence, MotionConfig, motion } from 'framer-motion';
+import type { AppTab, AppView, SenseType, UserProgress, QuizQuestion, StudentProfile } from './types';
 import { SENSES_MODULES } from './data/sensesData';
-import {
-  getRandomExamQuestions,
-  getQuestionsForSense,
-} from './data/questionsBank';
-import {
-  loadProgress,
-  saveProgress,
-  resetProgress,
-  loadStoredTheme,
-  saveStoredTheme,
-} from './lib/storage';
+import { getRandomExamQuestions, getQuestionsForSense, hasExamQuestionSet } from './data/questionsBank';
+import { completeLesson, calculateExamScore, recordExamResult, recordQuizResult } from './lib/learning';
+import { loadProgress, saveProgress, resetProgress, loadStoredTheme, saveStoredTheme } from './lib/storage';
 import { sound } from './lib/sound';
-
-// Components
 import { AppHeader } from './components/layout/AppHeader';
 import { MobileBottomNav } from './components/layout/MobileBottomNav';
 import { Footer } from './components/layout/Footer';
@@ -27,386 +17,285 @@ import { ExamArenaView } from './components/exam/ExamArenaView';
 import { ReportCardModal } from './components/exam/ReportCardModal';
 import { StudentProfileModal } from './components/profile/StudentProfileModal';
 import { WelcomeOnboardingModal } from './components/profile/WelcomeOnboardingModal';
+import { TapButton } from './components/ui/TapButton';
 
 export const App: React.FC = () => {
-  // Safe LocalStorage state initialization
   const [progress, setProgress] = useState<UserProgress>(() => loadProgress());
-  const [currentView, setCurrentView] = useState<string>('home');
+  const [currentView, setCurrentView] = useState<AppView>(() =>
+    window.location.pathname === '/' ? 'home' : 'not_found',
+  );
   const [selectedSenseId, setSelectedSenseId] = useState<SenseType>('mata');
-  const [isProfileModalOpen, setIsProfileModalOpen] = useState<boolean>(false);
-
-  // Exam session state
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [examQuestions, setExamQuestions] = useState<QuizQuestion[]>([]);
   const [examAnswers, setExamAnswers] = useState<Record<number, number>>({});
-  const [examTimeSpent, setExamTimeSpent] = useState<number>(0);
+  const [examTimeSpent, setExamTimeSpent] = useState(0);
+  const [examRewardStars, setExamRewardStars] = useState(0);
 
-  // Sync theme with document element and sound controller on mount
   useEffect(() => {
     const initialTheme = loadStoredTheme();
     saveStoredTheme(initialTheme);
     sound.enabled = progress.soundEnabled;
+    setProgress((previous) => ({ ...previous, theme: initialTheme }));
   }, []);
 
-  // Defensive save to LocalStorage whenever progress changes
   useEffect(() => {
     saveProgress(progress);
     sound.enabled = progress.soundEnabled;
   }, [progress]);
 
-  // Handle Theme Toggle
   const handleToggleTheme = () => {
     const nextTheme = progress.theme === 'dark' ? 'light' : 'dark';
     saveStoredTheme(nextTheme);
-    setProgress((prev) => ({
-      ...prev,
-      theme: nextTheme,
-    }));
+    setProgress((previous) => ({ ...previous, theme: nextTheme }));
     sound.playPop();
   };
 
-  // Handle Sound Toggle
   const handleToggleSound = () => {
     const nextSound = !progress.soundEnabled;
     sound.enabled = nextSound;
-    setProgress((prev) => ({
-      ...prev,
-      soundEnabled: nextSound,
-    }));
-    if (nextSound) {
-      sound.playPop();
-    }
+    setProgress((previous) => ({ ...previous, soundEnabled: nextSound }));
+    if (nextSound) sound.playPop();
   };
 
-  // Handle Updating Student Profile
   const handleUpdateProfile = (updated: Partial<StudentProfile>) => {
-    setProgress((prev) => ({
-      ...prev,
-      profile: {
-        ...prev.profile,
-        ...updated,
-      },
-    }));
+    setProgress((previous) => ({ ...previous, profile: { ...previous.profile, ...updated } }));
   };
 
-  // Handle Complete Lesson
   const handleCompleteLesson = (senseId: SenseType) => {
-    if (!progress.completedLessons.includes(senseId)) {
-      setProgress((prev) => ({
-        ...prev,
-        completedLessons: [...prev.completedLessons, senseId],
-        stars: prev.stars + 1,
-        xp: prev.xp + 15,
-        badges: prev.badges.includes(`${senseId}_badge`)
-          ? prev.badges
-          : [...prev.badges, `${senseId}_badge`],
-      }));
-    }
+    setProgress((previous) => completeLesson(previous, senseId));
   };
 
-  // Handle Finishing Module Quiz
-  const handleFinishQuiz = (scorePercent: number, starsEarned: number) => {
-    setProgress((prev) => {
-      const prevBest = prev.quizBestScores[selectedSenseId] || 0;
-      const newBest = Math.max(prevBest, scorePercent);
-      const updatedCompleted = prev.completedLessons.includes(selectedSenseId)
-        ? prev.completedLessons
-        : [...prev.completedLessons, selectedSenseId];
-
-      return {
-        ...prev,
-        stars: prev.stars + starsEarned,
-        xp: prev.xp + Math.round(scorePercent / 2),
-        completedLessons: updatedCompleted,
-        quizBestScores: {
-          ...prev.quizBestScores,
-          [selectedSenseId]: newBest,
-        },
-      };
-    });
+  const handleFinishQuiz = (scorePercent: number): number => {
+    const result = recordQuizResult(progress, selectedSenseId, scorePercent);
+    setProgress(result.progress);
+    return result.starsEarned;
   };
 
-  // Start Master Exam
-  const handleStartExam = () => {
+  const handleOpenExamIntro = () => {
+    setCurrentView('exam_intro');
+  };
+
+  const handleBeginExam = () => {
+    const randomizedQuestions = getRandomExamQuestions();
+    if (randomizedQuestions.length !== 15) return;
     sound.playPop();
-    const randomized = getRandomExamQuestions();
-    setExamQuestions(randomized);
+    setExamQuestions(randomizedQuestions);
     setExamAnswers({});
     setExamTimeSpent(0);
-    setCurrentView('exam_arena');
+    setExamRewardStars(0);
+    setCurrentView('exam');
   };
 
-  // Finish Master Exam
-  const handleFinishExam = (
-    answers: Record<number, number>,
-    timeSpentSeconds: number
-  ) => {
+  const handleFinishExam = (answers: Record<number, number>, timeSpentSeconds: number) => {
+    const result = calculateExamScore(examQuestions, answers);
+    const reward = recordExamResult(progress, result.percentage);
+    setProgress(reward.progress);
+    setExamRewardStars(reward.starsEarned);
     setExamAnswers(answers);
     setExamTimeSpent(timeSpentSeconds);
-
-    // Calculate score
-    let correct = 0;
-    examQuestions.forEach((q, idx) => {
-      if (answers[idx] === q.correctIndex) {
-        correct += 1;
-      }
-    });
-
-    const percent = Math.round((correct / examQuestions.length) * 100);
-    const starsBonus = percent >= 85 ? 5 : percent >= 70 ? 3 : 2;
-
-    setProgress((prev) => ({
-      ...prev,
-      stars: prev.stars + starsBonus,
-      xp: prev.xp + percent,
-      level: prev.level + (percent >= 70 ? 1 : 0),
-    }));
-
     setCurrentView('exam_result');
   };
 
-  // Handle Reset Data
+  const handleExitExam = () => {
+    setExamQuestions([]);
+    setExamAnswers({});
+    setCurrentView('exam_intro');
+  };
+
   const handleResetData = () => {
-    const fresh = resetProgress();
-    setProgress(fresh);
+    const freshProgress = resetProgress();
+    setProgress(freshProgress);
     saveStoredTheme('light');
+    setIsProfileModalOpen(false);
     setCurrentView('home');
   };
 
-  // Handle Onboarding Completion
-  const handleCompleteOnboarding = (
-    name: string,
-    avatarId: string,
-    avatarEmoji: string
-  ) => {
-    setProgress((prev) => ({
-      ...prev,
-      profile: {
-        ...prev.profile,
-        name,
-        avatarId,
-        avatarEmoji,
-      },
+  const handleCompleteOnboarding = (name: string, avatarId: string, avatarEmoji: string) => {
+    setProgress((previous) => ({
+      ...previous,
+      profile: { ...previous.profile, name, avatarId, avatarEmoji },
       hasCompletedOnboarding: true,
     }));
   };
 
-  // Smart Back Navigation (Anti-Tersesat)
   const handleSmartBack = () => {
-    if (currentView === 'quiz_play') {
-      setCurrentView('module_detail');
-    } else if (currentView === 'module_detail') {
-      setCurrentView('modules_list');
-    } else {
+    if (currentView === 'quiz') setCurrentView('module');
+    else if (currentView === 'module') setCurrentView('modules');
+    else if (currentView === 'modules' || currentView === 'exam_intro' || currentView === 'exam_result') {
       setCurrentView('home');
     }
   };
 
-  // Current Sense Module for Detail View
-  const currentModule =
-    SENSES_MODULES.find((m) => m.id === selectedSenseId) || SENSES_MODULES[0];
-
-  // Title context for header wayfinding
-  let titleContext = undefined;
-  if (currentView === 'module_detail') titleContext = `Modul ${currentModule.name}`;
-  if (currentView === 'quiz_play') titleContext = `Kuis ${currentModule.name}`;
-  if (currentView === 'exam_arena') titleContext = 'Arena Ujian Master';
-  if (currentView === 'exam_result') titleContext = 'Rapor Prestasi';
-
-  const isExamOrQuizActive = currentView === 'exam_arena' || currentView === 'quiz_play';
+  const currentModule = SENSES_MODULES.find((module) => module.id === selectedSenseId) ?? SENSES_MODULES[0];
+  const titleContext =
+    currentView === 'module' ? `Modul ${currentModule.name}` :
+      currentView === 'quiz' ? `Kuis ${currentModule.name}` :
+        currentView === 'exam' || currentView === 'exam_intro' ? 'Arena Ujian Master' :
+          currentView === 'exam_result' ? 'Rapor Prestasi' : undefined;
+  const isQuizOrExamActive = currentView === 'quiz' || currentView === 'exam';
+  const hideNavigation = isQuizOrExamActive || currentView === 'not_found';
+  const currentTab: AppTab =
+    currentView === 'modules' || currentView === 'module' ? 'modules' :
+      currentView === 'exam_intro' || currentView === 'exam' || currentView === 'exam_result' ? 'exam' :
+        'home';
 
   return (
-    <div className="min-h-screen flex flex-col transition-colors selection:bg-sky-400 selection:text-white">
-      {/* Universal Top Header */}
-      <AppHeader
-        progress={progress}
-        currentView={currentView}
-        titleContext={titleContext}
-        onNavigateHome={() => setCurrentView('home')}
-        onNavigateBack={handleSmartBack}
-        onOpenProfile={() => setIsProfileModalOpen(true)}
-        onToggleSound={handleToggleSound}
-        onToggleTheme={handleToggleTheme}
-      />
-
-      {/* Main Container */}
-      <main className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 pt-5 pb-16">
-        <AnimatePresence mode="wait">
-          {/* VIEW: HOME DASHBOARD */}
-          {currentView === 'home' && (
-            <motion.div
-              key="home"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="space-y-7"
-            >
-              <HeroBanner
-                progress={progress}
-                onExploreModules={() => setCurrentView('modules_list')}
-                onStartExam={handleStartExam}
-              />
-
-              <SenseIslandGrid
-                progress={progress}
-                onSelectSense={(senseId) => {
-                  setSelectedSenseId(senseId);
-                  setCurrentView('module_detail');
-                }}
-                onStartQuiz={(senseId) => {
-                  setSelectedSenseId(senseId);
-                  setCurrentView('quiz_play');
-                }}
-              />
-            </motion.div>
-          )}
-
-          {/* VIEW: 5 MODULES LIST */}
-          {currentView === 'modules_list' && (
-            <motion.div
-              key="modules_list"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="space-y-6"
-            >
-              <div className="space-y-1">
-                <h3 className="text-xl font-black text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                  <span>📚 Jelajahi 5 Pulau Keajaiban</span>
-                </h3>
-                <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300">
-                  Pelajari anatomi lengkap, alur kerja saraf, fakta unik, dan tips dokter cilik.
-                </p>
-              </div>
-
-              <SenseIslandGrid
-                progress={progress}
-                onSelectSense={(senseId) => {
-                  setSelectedSenseId(senseId);
-                  setCurrentView('module_detail');
-                }}
-                onStartQuiz={(senseId) => {
-                  setSelectedSenseId(senseId);
-                  setCurrentView('quiz_play');
-                }}
-              />
-            </motion.div>
-          )}
-
-          {/* VIEW: MODULE DETAIL */}
-          {currentView === 'module_detail' && (
-            <motion.div
-              key={`module_${selectedSenseId}`}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-            >
-              <LessonViewer
-                module={currentModule}
-                isCompleted={progress.completedLessons.includes(selectedSenseId)}
-                onBack={() => setCurrentView('home')}
-                onCompleteLesson={() => handleCompleteLesson(selectedSenseId)}
-                onStartQuiz={() => setCurrentView('quiz_play')}
-              />
-            </motion.div>
-          )}
-
-          {/* VIEW: QUIZ PLAY */}
-          {currentView === 'quiz_play' && (
-            <motion.div
-              key={`quiz_${selectedSenseId}`}
-              initial={{ opacity: 0, scale: 0.98 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.98 }}
-            >
-              <QuizPlayView
-                senseId={selectedSenseId}
-                organName={currentModule.name}
-                heroEmoji={currentModule.heroEmoji}
-                questions={getQuestionsForSense(selectedSenseId)}
-                onFinishQuiz={handleFinishQuiz}
-                onBack={() => setCurrentView('module_detail')}
-              />
-            </motion.div>
-          )}
-
-          {/* VIEW: EXAM ARENA */}
-          {currentView === 'exam_arena' && (
-            <motion.div
-              key="exam_arena"
-              initial={{ opacity: 0, scale: 0.98 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.98 }}
-            >
-              <ExamArenaView
-                questions={examQuestions}
-                onFinishExam={handleFinishExam}
-                onExit={() => setCurrentView('home')}
-              />
-            </motion.div>
-          )}
-
-          {/* VIEW: EXAM RESULT / RAPOR */}
-          {currentView === 'exam_result' && (
-            <motion.div
-              key="exam_result"
-              initial={{ opacity: 0, scale: 0.98 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.98 }}
-            >
-              <ReportCardModal
-                profile={progress.profile}
-                questions={examQuestions}
-                userAnswers={examAnswers}
-                timeSpentSeconds={examTimeSpent}
-                onRetry={handleStartExam}
-                onHome={() => setCurrentView('home')}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </main>
-
-      {/* Child-Friendly Footer */}
-      {!isExamOrQuizActive && <Footer onResetData={handleResetData} />}
-
-      {/* Mobile Bottom Thumb Navigation */}
-      <MobileBottomNav
-        currentTab={
-          currentView === 'modules_list' || currentView === 'module_detail'
-            ? 'modules'
-            : currentView === 'quiz_play'
-            ? 'quiz_select'
-            : currentView === 'exam_arena' || currentView === 'exam_result'
-            ? 'exam'
-            : 'home'
-        }
-        hideDuringQuizOrExam={isExamOrQuizActive}
-        onSelectTab={(tabId) => {
-          if (tabId === 'home') setCurrentView('home');
-          if (tabId === 'modules') setCurrentView('modules_list');
-          if (tabId === 'quiz_select') {
-            setCurrentView('modules_list');
-          }
-          if (tabId === 'exam') handleStartExam();
-          if (tabId === 'profile') setIsProfileModalOpen(true);
-        }}
-      />
-
-      {/* Student Profile Modal */}
-      {isProfileModalOpen && (
-        <StudentProfileModal
+    <MotionConfig reducedMotion="user">
+      <div className="min-h-screen flex flex-col transition-colors selection:bg-sky-400 selection:text-white">
+        <AppHeader
           progress={progress}
-          onUpdateProfile={handleUpdateProfile}
-          onResetProgress={handleResetData}
-          onClose={() => setIsProfileModalOpen(false)}
+          currentView={currentView}
+          showProfileButton={currentView !== 'exam'}
+          titleContext={titleContext}
+          onNavigateBack={handleSmartBack}
+          onOpenProfile={() => setIsProfileModalOpen(true)}
+          onToggleSound={handleToggleSound}
+          onToggleTheme={handleToggleTheme}
         />
-      )}
 
-      {/* Welcome Onboarding Modal for Fresh Students */}
-      {!progress.hasCompletedOnboarding && (
-        <WelcomeOnboardingModal onComplete={handleCompleteOnboarding} />
-      )}
-    </div>
+        <main className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 pt-5 pb-16">
+          <AnimatePresence mode="wait">
+            {currentView === 'home' && (
+              <motion.div key="home" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-7">
+                <HeroBanner progress={progress} onExploreModules={() => setCurrentView('modules')} onStartExam={handleOpenExamIntro} />
+                <SenseIslandGrid
+                  progress={progress}
+                  onSelectSense={(senseId) => { setSelectedSenseId(senseId); setCurrentView('module'); }}
+                  onStartQuiz={(senseId) => { setSelectedSenseId(senseId); setCurrentView('quiz'); }}
+                />
+              </motion.div>
+            )}
+
+            {currentView === 'modules' && (
+              <motion.div key="modules" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-6">
+                <div className="space-y-1">
+                  <h2 className="text-xl font-black text-slate-800 dark:text-slate-100">📚 Jelajahi 5 Pulau Keajaiban</h2>
+                  <p className="text-sm text-slate-700 dark:text-slate-300">Pelajari anatomi, cara kerja, fakta unik, dan tips merawat pancaindra.</p>
+                </div>
+                <SenseIslandGrid
+                  progress={progress}
+                  onSelectSense={(senseId) => { setSelectedSenseId(senseId); setCurrentView('module'); }}
+                  onStartQuiz={(senseId) => { setSelectedSenseId(senseId); setCurrentView('quiz'); }}
+                />
+              </motion.div>
+            )}
+
+            {currentView === 'module' && (
+              <motion.div key={`module_${selectedSenseId}`} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+                <LessonViewer
+                  module={currentModule}
+                  isCompleted={progress.lessonCompleted.includes(selectedSenseId)}
+                  onCompleteLesson={() => handleCompleteLesson(selectedSenseId)}
+                  onStartQuiz={() => setCurrentView('quiz')}
+                />
+              </motion.div>
+            )}
+
+            {currentView === 'quiz' && (
+              <motion.div key={`quiz_${selectedSenseId}`} initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }}>
+                <QuizPlayView
+                  organName={currentModule.name}
+                  heroEmoji={currentModule.heroEmoji}
+                  questions={getQuestionsForSense(selectedSenseId)}
+                  onFinishQuiz={handleFinishQuiz}
+                  onBack={() => setCurrentView('module')}
+                />
+              </motion.div>
+            )}
+
+            {currentView === 'exam_intro' && (
+              <motion.section
+                key="exam_intro"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                aria-labelledby="exam-intro-title"
+                className="max-w-2xl mx-auto rounded-3xl bg-white dark:bg-slate-900 border-2 border-amber-300 dark:border-amber-700 p-6 sm:p-8 shadow-xl space-y-6 text-center"
+              >
+                <div aria-hidden="true" className="text-5xl">🏆</div>
+                <div className="space-y-2">
+                  <h2 id="exam-intro-title" className="text-2xl sm:text-3xl font-black text-slate-800 dark:text-slate-100">Arena Ujian Master</h2>
+                  <p className="text-sm sm:text-base text-slate-700 dark:text-slate-300">Pastikan kamu sudah siap sebelum memulai.</p>
+                </div>
+                <div className="grid grid-cols-3 gap-2 text-sm font-bold text-slate-800 dark:text-slate-100">
+                  <div className="rounded-2xl bg-sky-50 dark:bg-sky-950/40 p-4"><strong className="block text-xl">15</strong> soal</div>
+                  <div className="rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 p-4"><strong className="block text-xl">5</strong> materi</div>
+                  <div className="rounded-2xl bg-amber-50 dark:bg-amber-950/40 p-4"><strong className="block text-xl">15</strong> menit</div>
+                </div>
+                {progress.examCompleted && progress.examBestScore !== null && (
+                  <p className="text-sm text-slate-700 dark:text-slate-300">Nilai terbaikmu sejauh ini: <strong>{progress.examBestScore}/100</strong></p>
+                )}
+                {!hasExamQuestionSet() && <p role="status" className="text-sm text-rose-700 dark:text-rose-300">Soal ujian belum tersedia lengkap.</p>}
+                <TapButton variant="amber" size="lg" onClick={handleBeginExam} disabled={!hasExamQuestionSet()} className="w-full sm:w-auto">
+                  Mulai Ujian
+                </TapButton>
+              </motion.section>
+            )}
+
+            {currentView === 'exam' && (
+              <motion.div key="exam" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }}>
+                <ExamArenaView questions={examQuestions} onFinishExam={handleFinishExam} onExit={handleExitExam} />
+              </motion.div>
+            )}
+
+            {currentView === 'exam_result' && (
+              <motion.div key="exam_result" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }}>
+                <ReportCardModal
+                  profile={progress.profile}
+                  questions={examQuestions}
+                  userAnswers={examAnswers}
+                  timeSpentSeconds={examTimeSpent}
+                  starsEarned={examRewardStars}
+                  onRetry={handleOpenExamIntro}
+                  onHome={() => setCurrentView('home')}
+                />
+              </motion.div>
+            )}
+
+            {currentView === 'not_found' && (
+              <motion.section
+                key="not_found"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                aria-labelledby="not-found-title"
+                className="max-w-xl mx-auto rounded-3xl bg-white dark:bg-slate-900 border-2 border-sky-200 dark:border-slate-800 p-8 text-center space-y-4 shadow-lg"
+              >
+                <p className="text-sm font-black uppercase tracking-wider text-sky-700 dark:text-sky-300">Halaman tidak ditemukan</p>
+                <h2 id="not-found-title" className="text-5xl font-black text-slate-800 dark:text-slate-100">404</h2>
+                <p className="text-sm text-slate-700 dark:text-slate-300">Halaman ini belum tersedia. Kembali ke beranda untuk melanjutkan petualangan.</p>
+                <a href="/" className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-sky-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-sky-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600">
+                  Kembali ke Beranda
+                </a>
+              </motion.section>
+            )}
+          </AnimatePresence>
+        </main>
+
+        {!hideNavigation && <Footer onResetData={handleResetData} />}
+
+        <MobileBottomNav
+          currentTab={currentTab}
+          hideDuringQuizOrExam={hideNavigation}
+          onSelectTab={(tab) => {
+            if (tab === 'home') setCurrentView('home');
+            if (tab === 'modules') setCurrentView('modules');
+            if (tab === 'exam') handleOpenExamIntro();
+            if (tab === 'profile') setIsProfileModalOpen(true);
+          }}
+        />
+
+        {isProfileModalOpen && (
+          <StudentProfileModal
+            progress={progress}
+            onUpdateProfile={handleUpdateProfile}
+            onResetProgress={handleResetData}
+            onClose={() => setIsProfileModalOpen(false)}
+          />
+        )}
+
+        {!progress.hasCompletedOnboarding && <WelcomeOnboardingModal onComplete={handleCompleteOnboarding} />}
+      </div>
+    </MotionConfig>
   );
 };
 

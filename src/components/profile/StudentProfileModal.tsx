@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { X, RotateCcw, Check, User } from 'lucide-react';
-import type { UserProgress, StudentProfile } from '../../types';
+import type { SenseType, UserProgress, StudentProfile } from '../../types';
 import { TapButton } from '../ui/TapButton';
+import { AccessibleDialog } from '../ui/AccessibleDialog';
 import { sound } from '../../lib/sound';
 
 interface StudentProfileModalProps {
@@ -50,7 +51,7 @@ export const StudentProfileModal: React.FC<StudentProfileModalProps> = ({
     onClose();
   };
 
-  const islandBadges = [
+  const islandBadges: { id: SenseType; name: string; emoji: string; color: string }[] = [
     { id: 'mata', name: 'Mata Elang', emoji: '👁️', color: 'border-emerald-400 bg-emerald-50 dark:bg-emerald-950/40' },
     { id: 'telinga', name: 'Telinga Emas', emoji: '👂', color: 'border-sky-400 bg-sky-50 dark:bg-sky-950/40' },
     { id: 'lidah', name: 'Lidah Maestro', emoji: '👅', color: 'border-rose-400 bg-rose-50 dark:bg-rose-950/40' },
@@ -60,11 +61,12 @@ export const StudentProfileModal: React.FC<StudentProfileModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.92 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="max-w-md w-full rounded-3xl bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 p-6 space-y-6 shadow-2xl relative my-8"
-      >
+      <AccessibleDialog labelledBy="student-profile-title" onDismiss={onClose} className="max-w-md w-full my-8">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.92 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="rounded-3xl bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 p-6 space-y-6 shadow-2xl relative"
+        >
         {/* Close Button */}
         <button
           onClick={() => {
@@ -72,12 +74,13 @@ export const StudentProfileModal: React.FC<StudentProfileModalProps> = ({
             onClose();
           }}
           className="absolute top-4 right-4 w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 cursor-pointer"
+          aria-label="Tutup profil"
         >
           <X className="w-5 h-5" />
         </button>
 
         <div className="space-y-1">
-          <h3 className="text-xl font-black text-slate-800 dark:text-slate-100 flex items-center gap-2 font-display">
+          <h3 id="student-profile-title" className="text-xl font-black text-slate-800 dark:text-slate-100 flex items-center gap-2 font-display">
             <span className="p-1 rounded-lg bg-sky-100 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400">
               <User className="w-4 h-4" />
             </span>
@@ -90,10 +93,11 @@ export const StudentProfileModal: React.FC<StudentProfileModalProps> = ({
 
         {/* Name Input */}
         <div className="space-y-1.5">
-          <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
+          <label htmlFor="student-profile-name" className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
             Nama Panggilan Siswa <span className="text-rose-500">*</span>
           </label>
           <input
+            id="student-profile-name"
             type="text"
             value={nameInput}
             maxLength={20}
@@ -102,6 +106,8 @@ export const StudentProfileModal: React.FC<StudentProfileModalProps> = ({
               if (errorMsg) setErrorMsg('');
             }}
             placeholder="Masukkan nama panggilan..."
+            aria-invalid={Boolean(errorMsg)}
+            aria-describedby={errorMsg ? 'student-profile-name-error' : undefined}
             className={`w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800 border-2 font-bold text-sm text-slate-800 dark:text-white focus:outline-none transition-colors ${
               errorMsg
                 ? 'border-rose-400 focus:border-rose-500'
@@ -109,7 +115,7 @@ export const StudentProfileModal: React.FC<StudentProfileModalProps> = ({
             }`}
           />
           {errorMsg && (
-            <p className="text-xs font-bold text-rose-500">
+            <p id="student-profile-name-error" role="alert" className="text-sm font-bold text-rose-500">
               {errorMsg}
             </p>
           )}
@@ -137,7 +143,7 @@ export const StudentProfileModal: React.FC<StudentProfileModalProps> = ({
                   }`}
                 >
                   <span className="text-2xl">{av.emoji}</span>
-                  <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300 leading-tight text-center">
+                  <span className="text-xs font-bold text-slate-700 dark:text-slate-300 leading-tight text-center">
                     {av.label}
                   </span>
                 </button>
@@ -151,12 +157,12 @@ export const StudentProfileModal: React.FC<StudentProfileModalProps> = ({
           <div className="flex justify-between items-center text-xs font-bold text-slate-700 dark:text-slate-300">
             <span>Lemari 5 Lencana Pulau</span>
             <span className="text-sky-600 dark:text-sky-400">
-              {progress.completedLessons.length}/5 Terkumpul
+              {progress.lessonCompleted.length}/5 Terkumpul
             </span>
           </div>
           <div className="grid grid-cols-5 gap-1.5">
             {islandBadges.map((badge) => {
-              const isEarned = progress.completedLessons.includes(badge.id as any);
+              const isEarned = progress.lessonCompleted.includes(badge.id);
               return (
                 <div
                   key={badge.id}
@@ -168,7 +174,7 @@ export const StudentProfileModal: React.FC<StudentProfileModalProps> = ({
                   title={isEarned ? `Lencana ${badge.name} (Terkumpul)` : `Lencana ${badge.name} (Belum)`}
                 >
                   <span className="text-xl">{badge.emoji}</span>
-                  <span className="text-[9px] font-bold truncate w-full">
+                  <span className="text-xs font-bold truncate w-full">
                     {badge.name.split(' ')[0]}
                   </span>
                 </div>
@@ -227,7 +233,8 @@ export const StudentProfileModal: React.FC<StudentProfileModalProps> = ({
             </div>
           )}
         </div>
-      </motion.div>
+        </motion.div>
+      </AccessibleDialog>
     </div>
   );
 };
